@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문의 INQUIRY - INTECH LIGHTING</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- EmailJS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <div style="background-color: #2c2c2c;">
+            <div class="header-wrapper">
+                <header>
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+                    <div class="logo">INTECH LIGHTING</div>
+                    <nav>
+                        <a href="index.html">카탈로그</a>
+                        <a href="project.html">프로젝트</a>
+                        <a href="inquiry.html">문의</a>
+                    </nav>
+                    <div class="search-box">
+                        <input type="text" placeholder="search">
+                        <span>🔍</span>
+                    </div>
+                </header>
+            </div>
+        </div>
+
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <div class="container">
+        <!-- <aside class="sidebar" id="sidebar">
+            <h3>제품</h3>
+            
+            <div class="filter-group">
+                <h4 onclick="toggleFilterGroup(this)">WATT</h4>
+                <div class="filter-group-content">
+                    <label><input type="checkbox"> 0t-05W</label>
+                    <label><input type="checkbox"> 06-10W</label>
+                    <label><input type="checkbox"> 11-15W</label>
+                    <label><input type="checkbox"> 16-20W</label>
+                    <label><input type="checkbox"> 21-25W</label>
+                    <label><input type="checkbox"> 26-30W</label>
+                    <label><input type="checkbox"> 30W~</label>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <h4 onclick="toggleFilterGroup(this)">CCT</h4>
+                <div class="filter-group-content">
+                    <label><input type="checkbox"> 2400K</label>
+                    <label><input type="checkbox"> 2700K</label>
+                    <label><input type="checkbox"> 3000K</label>
+                    <label><input type="checkbox"> 3500K</label>
+                    <label><input type="checkbox"> 4000K</label>
+                    <label><input type="checkbox"> 6000K</label>
+                    <label><input type="checkbox"> 5700K</label>
+                    <label><input type="checkbox"> 6500K</label>
+                    <label><input type="checkbox"> TW</label>
+                    <label><input type="checkbox"> RGB</label>
+                    <label><input type="checkbox"> RGBW</label>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <h4 onclick="toggleFilterGroup(this)">IP</h4>
+                <div class="filter-group-content">
+                    <label><input type="checkbox"> IP20</label>
+                    <label><input type="checkbox"> IP44</label>
+                    <label><input type="checkbox"> IP54</label>
+                    <label><input type="checkbox"> IP65</label>
+                    <label><input type="checkbox"> IP66</label>
+                    <label><input type="checkbox"> IP67</label>
+                    <label><input type="checkbox"> IP68</label>
+                </div>
+            </div>
+        </aside> -->
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <h1 class="inquiry-page-title">문의</h1>
+            <p class="inquiry-subtitle">
+                문의를 주시면 최대한 빠른시간에 답변을 드리겠습니다.<br>
+                정확한 전화번호와 이메일을 주시면 좀더 정확하고 빠른 상담이 가능합니다
+            </p>
+
+            <div class="success-message" id="successMessage">
+                ✓ 문의가 성공적으로 전송되었습니다! 빠른 시일 내에 답변드리겠습니다.
+            </div>
+
+            <div class="error-message" id="errorMessage">
+                ✗ 전송 중 오류가 발생했습니다. 다시 시도해주세요.
+            </div>
+
+            <form class="inquiry-form" id="inquiryForm">
+                <div class="form-group">
+                    <label>이름/회사명<span class="required">*</span></label>
+                    <input type="text" name="name" required placeholder="이름 또는 회사명을 입력하세요">
+                </div>
+
+                <div class="form-group">
+                    <label>이메일<span class="required">*</span></label>
+                    <input type="email" name="email" required placeholder="example@email.com">
+                </div>
+
+                <div class="form-group">
+                    <label>전화번호<span class="required">*</span></label>
+                    <input type="tel" name="phone" required placeholder="010-0000-0000">
+                </div>
+
+                <div class="form-group">
+                    <label>현장/프로젝트/지역<span class="required">*</span></label>
+                    <input type="text" name="project" required placeholder="프로젝트명 또는 지역을 입력하세요">
+                </div>
+
+                <div class="form-group">
+                    <label>문의내용<span class="required">*</span></label>
+                    <textarea name="message" required placeholder="문의하실 내용을 상세히 입력해주세요"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>파일 첨부</label>
+                    <div class="file-upload-area" onclick="document.getElementById('fileInput').click()">
+                        <input type="file" id="fileInput" multiple onchange="handleFiles(event)">
+                        <div style="font-size: 40px; margin-bottom: 10px;">📎</div>
+                        <p>파일 선택 | 선택된 파일 없음</p>
+                        <p style="font-size: 13px; color: #999; margin-top: 10px;">최대 10MB까지 업로드 가능</p>
+                    </div>
+                    <div class="file-list" id="fileList" style="display: none;"></div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">문의하기</button>
+            </form>
+        </main>
+    </div>
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-to-top" id="scrollToTop" onclick="scrollToTop()">↑</button>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>CONTACT</h3>
+                <p>TEL • 02-747-3700~1</p>
+                <p>FAX • 02-747-3702</p>
+                <p>EMAIL • info@intechlighting.com</p>
+            </div>
+
+            <div class="footer-section">
+                <h3>COMPANY</h3>
+                <p>(주)인테크라이팅</p>
+                <p>경기 시흥시 효현로 (경기 시흥시 대야동)</p>
+                <p>사업자등록번호 799-81-00657</p>
+            </div>
+
+            <div class="footer-section">
+                <h3>BUSINESS HOURS</h3>
+                <p>평일 09:00 ~ 18:00</p>
+                <p>토요일 09:00 ~ 15:00</p>
+                <p>점심시간 12:00 ~ 13:00</p>
+                <p>공휴일 휴무</p>
+            </div>
+
+            <div class="copyright">
+                COPYRIGHT © 2025 INTECH LIGHTING.<br>
+                ALL RIGHTS RESERVED.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // EmailJS 초기화
+        (function() {
+            emailjs.init("YOUR_PUBLIC_KEY"); // ← 여기에 EmailJS Public Key 입력
+        })();
+
+        let attachedFiles = [];
+
+        // 파일 처리
+        function handleFiles(event) {
+            const files = Array.from(event.target.files);
+            attachedFiles = [...attachedFiles, ...files];
+            updateFileList();
+        }
+
+        // 파일 목록 업데이트
+        function updateFileList() {
+            const fileList = document.getElementById('fileList');
+            
+            if (attachedFiles.length === 0) {
+                fileList.style.display = 'none';
+                return;
+            }
+
+            fileList.style.display = 'block';
+            fileList.innerHTML = '';
+
+            attachedFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <span>📄 ${file.name} (${(file.size / 1024).toFixed(1)} KB)</span>
+                    <button type="button" onclick="removeFile(${index})">삭제</button>
+                `;
+                fileList.appendChild(fileItem);
+            });
+        }
+
+        // 파일 삭제
+        function removeFile(index) {
+            attachedFiles.splice(index, 1);
+            updateFileList();
+        }
+
+        // 폼 제출
+        document.getElementById('inquiryForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const successMessage = document.getElementById('successMessage');
+            const errorMessage = document.getElementById('errorMessage');
+
+            // 버튼 비활성화
+            submitBtn.disabled = true;
+            submitBtn.textContent = '전송 중...';
+
+            // 폼 데이터 수집
+            const formData = {
+                name: this.name.value,
+                email: this.email.value,
+                phone: this.phone.value,
+                project: this.project.value,
+                message: this.message.value,
+                files: attachedFiles.length > 0 ? attachedFiles.map(f => f.name).join(', ') : '없음'
+            };
+
+            // EmailJS로 전송
+            emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', formData)
+                .then(function(response) {
+                    console.log('SUCCESS!', response.status, response.text);
+                    
+                    // 성공 메시지 표시
+                    successMessage.style.display = 'block';
+                    errorMessage.style.display = 'none';
+                    
+                    // 폼 초기화
+                    document.getElementById('inquiryForm').reset();
+                    attachedFiles = [];
+                    updateFileList();
+                    
+                    // 버튼 활성화
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '문의하기';
+                    
+                    // 3초 후 메시지 숨김
+                    setTimeout(() => {
+                        successMessage.style.display = 'none';
+                    }, 5000);
+
+                    // 페이지 상단으로 스크롤
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    
+                }, function(error) {
+                    console.log('FAILED...', error);
+                    
+                    // 에러 메시지 표시
+                    errorMessage.style.display = 'block';
+                    successMessage.style.display = 'none';
+                    
+                    // 버튼 활성화
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '문의하기';
+                    
+                    // 3초 후 메시지 숨김
+                    setTimeout(() => {
+                        errorMessage.style.display = 'none';
+                    }, 5000);
+                });
+        });
+
+        // 사이드바 토글
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        // 스크롤 투 탑 버튼
+        window.addEventListener('scroll', function() {
+            const scrollBtn = document.getElementById('scrollToTop');
+            if (window.pageYOffset > 300) {
+                scrollBtn.classList.add('show');
+            } else {
+                scrollBtn.classList.remove('show');
+            }
+        });
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

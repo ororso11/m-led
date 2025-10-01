@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>제품 관리 시스템</title>
+    
+    <link rel="stylesheet" href="css/admin.css">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 제품 관리 시스템 (Firebase 실시간 버전)</h1>
+        
+        <div id="syncStatus" class="sync-status disconnected">
+            Firebase 연결 중...
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" data-tab="add" onclick="showTab('add')">제품 추가</button>
+            <button class="tab" data-tab="list" onclick="showTab('list')">제품 목록</button>
+            <button class="tab" data-tab="manage" onclick="showTab('manage')">제품 관리</button>
+        </div>
+        
+        <!-- 제품 추가 탭 -->
+        <div id="addTab" class="tab-content active">
+            <h2>제품 추가</h2>
+            <form id="productForm">
+                <div class="form-group">
+                    <label for="productName">제품명 *</label>
+                    <input type="text" id="productName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="thumbnailInput">썸네일 이미지 *</label>
+                    <input type="file" id="thumbnailInput" accept="image/*" onchange="handleThumbnailUpload(event)" required>
+                    <div id="thumbnailPreview" class="image-preview"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="detailImagesInput">상세 이미지들 *</label>
+                    <input type="file" id="detailImagesInput" accept="image/*" multiple onchange="handleDetailImagesUpload(event)" required>
+                    <div id="detailImagesPreview" class="image-preview"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="productSpecs">제품 사양 (줄바꿈으로 구분)</label>
+                    <textarea id="productSpecs" placeholder="제품명&#10;타입&#10;용량"></textarea>
+                </div>
+                
+                <h3 style="margin: 30px 0 20px 0;">제품 상세 스펙</h3>
+                
+                <div class="form-group">
+                    <label>스펙 리스트 추가</label>
+                    <div class="spec-input-wrapper">
+                        <input type="text" id="specInput" placeholder="스펙 항목 입력 (예: CRI > 90)">
+                        <button type="button" onclick="addSpec()">추가</button>
+                    </div>
+                    <ul id="specsList"></ul>
+                </div>
+                
+                <h3 style="margin: 30px 0 20px 0;">제품 테이블 데이터</h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label for="tableItem">품목</label>
+                        <input type="text" id="tableItem" placeholder="LED 다운라이트">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tableVoltage">전압</label>
+                        <input type="text" id="tableVoltage" placeholder="AC 220V">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tableCurrent">전류</label>
+                        <input type="text" id="tableCurrent" placeholder="0.05A">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tableMaxOutput">최대출력</label>
+                        <input type="text" id="tableMaxOutput" placeholder="10W">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tableEfficiency">효율</label>
+                        <input type="text" id="tableEfficiency" placeholder="100lm/W">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tableDimension">크기</label>
+                        <input type="text" id="tableDimension" placeholder="Ø90 x H50mm">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tableGuarantee">보증기간</label>
+                        <input type="text" id="tableGuarantee" placeholder="2년">
+                    </div>
+                </div>
+                
+                <h3 style="margin: 30px 0 20px 0;">카테고리 설정</h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label for="categoryWatt">WATT 카테고리</label>
+                        <select id="categoryWatt">
+                            <option value="">선택하세요</option>
+                            <option value="0-5W">0-5W</option>
+                            <option value="6-10W">6-10W</option>
+                            <option value="11-15W">11-15W</option>
+                            <option value="16-20W">16-20W</option>
+                            <option value="21-25W">21-25W</option>
+                            <option value="26-30W">26-30W</option>
+                            <option value="30W+">30W+</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="categoryCCT">CCT 카테고리</label>
+                        <select id="categoryCCT">
+                            <option value="">선택하세요</option>
+                            <option value="2400K">2400K</option>
+                            <option value="2700K">2700K</option>
+                            <option value="3000K">3000K</option>
+                            <option value="3500K">3500K</option>
+                            <option value="4000K">4000K</option>
+                            <option value="5700K">5700K</option>
+                            <option value="6000K">6000K</option>
+                            <option value="6500K">6500K</option>
+                            <option value="TW">TW</option>
+                            <option value="RGB">RGB</option>
+                            <option value="RGBW">RGBW</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="categoryIP">IP 카테고리</label>
+                        <select id="categoryIP">
+                            <option value="">선택하세요</option>
+                            <option value="IP20">IP20</option>
+                            <option value="IP44">IP44</option>
+                            <option value="IP54">IP54</option>
+                            <option value="IP65">IP65</option>
+                            <option value="IP66">IP66</option>
+                            <option value="IP67">IP67</option>
+                            <option value="IP68">IP68</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button type="submit" class="submit-btn">제품 추가</button>
+            </form>
+            
+            <div id="loadingMessage" style="display: none;">
+                ⏳ 처리 중입니다...
+            </div>
+            
+            <div id="successMessage" style="display: none;">
+                ✅ 제품이 성공적으로 추가되었습니다! (실시간 반영)
+            </div>
+        </div>
+        
+        <!-- 제품 목록 탭 -->
+        <div id="listTab" class="tab-content">
+            <h2>제품 목록</h2>
+            <div id="productList">
+                <!-- 제품 목록이 여기에 표시됩니다 -->
+            </div>
+        </div>
+        
+        <!-- 제품 관리 탭 -->
+        <div id="manageTab" class="tab-content">
+            <h2>제품 관리</h2>
+            <p style="color: #666; margin-bottom: 20px;">제품을 클릭하여 수정하거나 삭제할 수 있습니다.</p>
+            <div id="productManageList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+                <!-- 제품 카드들이 여기에 표시됩니다 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase 설정 파일 -->
+    <script src="js/firebase-config.js"></script>
+    
+    <!-- admin.js -->
+    <script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>프로젝트 상세 - INTECH LIGHTING</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <div style="background-color: #2c2c2c;">
+            <div class="header-wrapper">
+                <header>
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+                    <div class="logo">INTECH LIGHTING</div>
+                    <nav>
+                        <a href="index.html">카탈로그</a>
+                        <a href="project.html">프로젝트</a>
+                        <a href="inquiry.html">문의</a>
+                    </nav>
+                    <div class="search-box">
+                        <input type="text" placeholder="search">
+                        <span>🔍</span>
+                    </div>
+                </header>
+            </div>
+        </div>
+
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <h3>제품</h3>
+            
+            <div class="filter-group">
+                <h4 onclick="toggleFilterGroup(this)">WATT</h4>
+                <div class="filter-group-content">
+                    <label><input type="checkbox"> 0t-05W</label>
+                    <label><input type="checkbox"> 06-10W</label>
+                    <label><input type="checkbox"> 11-15W</label>
+                    <label><input type="checkbox"> 16-20W</label>
+                    <label><input type="checkbox"> 21-25W</label>
+                    <label><input type="checkbox"> 26-30W</label>
+                    <label><input type="checkbox"> 30W~</label>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <h4 onclick="toggleFilterGroup(this)">CCT</h4>
+                <div class="filter-group-content">
+                    <label><input type="checkbox"> 2400K</label>
+                    <label><input type="checkbox"> 2700K</label>
+                    <label><input type="checkbox"> 3000K</label>
+                    <label><input type="checkbox"> 3500K</label>
+                    <label><input type="checkbox"> 4000K</label>
+                    <label><input type="checkbox"> 6000K</label>
+                    <label><input type="checkbox"> 5700K</label>
+                    <label><input type="checkbox"> 6500K</label>
+                    <label><input type="checkbox"> TW</label>
+                    <label><input type="checkbox"> RGB</label>
+                    <label><input type="checkbox"> RGBW</label>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <h4 onclick="toggleFilterGroup(this)">IP</h4>
+                <div class="filter-group-content">
+                    <label><input type="checkbox"> IP20</label>
+                    <label><input type="checkbox"> IP44</label>
+                    <label><input type="checkbox"> IP54</label>
+                    <label><input type="checkbox"> IP65</label>
+                    <label><input type="checkbox"> IP66</label>
+                    <label><input type="checkbox"> IP67</label>
+                    <label><input type="checkbox"> IP68</label>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="breadcrumb">
+                <a href="project.html" style="color: #666; text-decoration: none;">← 프로젝트 목록</a>
+            </div>
+
+            <div class="detail-content" id="projectDetailContent">
+                <!-- JavaScript로 동적 생성 -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>CONTACT</h3>
+                <p>TEL • 02-747-3700~1</p>
+                <p>FAX • 02-747-3702</p>
+                <p>EMAIL • info@intechlighting.com</p>
+            </div>
+
+            <div class="footer-section">
+                <h3>COMPANY</h3>
+                <p>(주)인테크라이팅</p>
+                <p>경기 시흥시 효현로 (경기 시흥시 대야동)</p>
+                <p>사업자등록번호 799-81-00657</p>
+            </div>
+
+            <div class="footer-section">
+                <h3>BUSINESS HOURS</h3>
+                <p>평일 09:00 ~ 18:00</p>
+                <p>토요일 09:00 ~ 15:00</p>
+                <p>점심시간 12:00 ~ 13:00</p>
+                <p>공휴일 휴무</p>
+            </div>
+
+            <div class="copyright">
+                COPYRIGHT © 2025 INTECH LIGHTING.<br>
+                ALL RIGHTS RESERVED.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // URL에서 프로젝트 ID 가져오기
+        const urlParams = new URLSearchParams(window.location.search);
+        const projectId = urlParams.get('id');
+
+        // 프로젝트 데이터 (실제로는 별도 파일에서 import)
+        const projectsData = {
+            '0': {
+                title: '하우스오브신세계 강남점',
+                category: '신세계백화점',
+                description: '신세계백화점 강남점 하우스오브신세계는 프리미엄 패션 브랜드를 위한 고급스러운 조명 연출을 통해 브랜드 가치를 극대화했습니다.',
+                images: [
+                    'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22%3E%3Crect fill=%22%23e3f2fd%22 width=%22800%22 height=%22600%22/%3E%3Ctext fill=%22%232196F3%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 font-size=%2224%22%3E하우스오브신세계 - 이미지 1%3C/text%3E%3C/svg%3E',
+                    'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22%3E%3Crect fill=%22%23bbdefb%22 width=%22800%22 height=%22600%22/%3E%3Ctext fill=%22%231976d2%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 font-size=%2224%22%3E하우스오브신세계 - 이미지 2%3C/text%3E%3C/svg%3E',
+                    'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22%3E%3Crect fill=%22%2390caf9%22 width=%22800%22 height=%22600%22/%3E%3Ctext fill=%22%230d47a1%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 font-size=%2224%22%3E하우스오브신세계 - 이미지 3%3C/text%3E%3C/svg%3E'
+                ],
+                specs: [
+                    '위치: 서울 강남구',
+                    '시공일: 2024.06',
+                    '면적: 1,200㎡',
+                    '사용제품: LED Strip, Spot Light'
+                ]
+            }
+        };
+
+        // 상세 페이지 렌더링
+        function renderProjectDetail() {
+            const project = projectsData[projectId] || projectsData['0'];
+            const content = document.getElementById('projectDetailContent');
+
+            let imagesHTML = '';
+            project.images.forEach(img => {
+                imagesHTML += `
+                    <div class="detail-main-image">
+                        <img src="${img}" alt="${project.title}">
+                    </div>
+                `;
+            });
+
+            let specsHTML = '';
+            project.specs.forEach(spec => {
+                specsHTML += `<li>${spec}</li>`;
+            });
+
+            content.innerHTML = `
+                <h1 class="detail-title">${project.title}</h1>
+                
+                <div class="detail-images-section" style="grid-template-columns: 1fr;">
+                    ${imagesHTML}
+                </div>
+
+                <div style="margin-top: 40px;">
+                    <h3 style="font-size: 20px; margin-bottom: 20px;">프로젝트 정보</h3>
+                    <div class="detail-specs-list">
+                        <ul>
+                            ${specsHTML}
+                        </ul>
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px; padding: 30px; background: #f9f9f9; border-radius: 8px;">
+                    <h3 style="font-size: 18px; margin-bottom: 15px;">프로젝트 설명</h3>
+                    <p style="line-height: 1.8; color: #666;">${project.description}</p>
+                </div>
+            `;
+        }
+
+        function toggleFilterGroup(element) {
+            element.classList.toggle('collapsed');
+            const content = element.nextElementSibling;
+            content.classList.toggle('collapsed');
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        window.onload = function() {
+            renderProjectDetail();
+        };
+    </script>
+</body>
+</html>

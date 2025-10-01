@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROJECT - INTECH LIGHTING</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <div style="background-color: #2c2c2c;">
+            <div class="header-wrapper">
+                <header>
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+                    <div class="logo">INTECH LIGHTING</div>
+                    <nav>
+                        <a href="index.html">카탈로그</a>
+                        <a href="project.html">프로젝트</a>
+                        <a href="inquiry.html">문의</a>
+                    </nav>
+                    <div class="search-box">
+                        <input type="text" placeholder="search">
+                        <span>🔍</span>
+                    </div>
+                </header>
+            </div>
+        </div>
+
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <!-- <aside class="sidebar" id="sidebar">
+            <h3>제품</h3>
+            
+            <div class="filter-group">
+                <h4 onclick="toggleFilterGroup(this)">WATT</h4>
+                <div class="filter-group-content">
+                    <label><input type="checkbox"> 0t-05W</label>
+                    <label><input type="checkbox"> 06-10W</label>
+                    <label><input type="checkbox"> 11-15W</label>
+                    <label><input type="checkbox"> 16-20W</label>
+                    <label><input type="checkbox"> 21-25W</label>
+                    <label><input type="checkbox"> 26-30W</label>
+                    <label><input type="checkbox"> 30W~</label>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <h4 onclick="toggleFilterGroup(this)">CCT</h4>
+                <div class="filter-group-content">
+                    <label><input type="checkbox"> 2400K</label>
+                    <label><input type="checkbox"> 2700K</label>
+                    <label><input type="checkbox"> 3000K</label>
+                    <label><input type="checkbox"> 3500K</label>
+                    <label><input type="checkbox"> 4000K</label>
+                    <label><input type="checkbox"> 6000K</label>
+                    <label><input type="checkbox"> 5700K</label>
+                    <label><input type="checkbox"> 6500K</label>
+                    <label><input type="checkbox"> TW</label>
+                    <label><input type="checkbox"> RGB</label>
+                    <label><input type="checkbox"> RGBW</label>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <h4 onclick="toggleFilterGroup(this)">IP</h4>
+                <div class="filter-group-content">
+                    <label><input type="checkbox"> IP20</label>
+                    <label><input type="checkbox"> IP44</label>
+                    <label><input type="checkbox"> IP54</label>
+                    <label><input type="checkbox"> IP65</label>
+                    <label><input type="checkbox"> IP66</label>
+                    <label><input type="checkbox"> IP67</label>
+                    <label><input type="checkbox"> IP68</label>
+                </div>
+            </div>
+        </aside> -->
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <h1 class="project-page-title">프로젝트</h1>
+
+            <div class="category-tabs">
+                <button class="category-tab active" onclick="filterProjects('all')">전체</button>
+                <button class="category-tab" onclick="filterProjects('무신사')">무신사</button>
+            </div>
+
+            <div class="projects-grid" id="projectsGrid">
+                <!-- 프로젝트들이 여기에 표시됩니다 -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>CONTACT</h3>
+                <p>TEL • 02-747-3700~1</p>
+                <p>FAX • 02-747-3702</p>
+                <p>EMAIL • info@intechlighting.com</p>
+            </div>
+
+            <div class="footer-section">
+                <h3>COMPANY</h3>
+                <p>(주)인테크라이팅</p>
+                <p>경기 시흥시 효현로 (경기 시흥시 대야동)</p>
+                <p>사업자등록번호 799-81-00657</p>
+            </div>
+
+            <div class="footer-section">
+                <h3>BUSINESS HOURS</h3>
+                <p>평일 09:00 ~ 18:00</p>
+                <p>토요일 09:00 ~ 15:00</p>
+                <p>점심시간 12:00 ~ 13:00</p>
+                <p>공휴일 휴무</p>
+            </div>
+
+            <div class="copyright">
+                COPYRIGHT © 2025 INTECH LIGHTING.<br>
+                ALL RIGHTS RESERVED.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 프로젝트 데이터 (샘플)
+        const projects = [
+            {
+                title: '무신사',
+                category: '무신사',
+                image: 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%23e3f2fd%22 width=%22400%22 height=%22300%22/%3E%3Ctext fill=%22%232196F3%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 font-size=%2218%22%무신사%3C/text%3E%3C/svg%3E'
+            }
+        ];
+
+        let currentCategory = 'all';
+
+        // 프로젝트 표시
+        function displayProjects() {
+            const grid = document.getElementById('projectsGrid');
+            grid.innerHTML = '';
+
+            const filtered = currentCategory === 'all' 
+                ? projects 
+                : projects.filter(p => p.category === currentCategory);
+
+            filtered.forEach((project, index) => {
+                const card = document.createElement('div');
+                card.className = 'project-card';
+                card.onclick = () => location.href = `project-detail.html?id=${index}`;
+                card.innerHTML = `
+                    <div class="project-image">
+                        <img src="${project.image}" alt="${project.title}">
+                    </div>
+                    <div class="project-info">
+                        <div class="project-title">${project.title}</div>
+                        <div class="project-category">${project.category}</div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // 카테고리 필터
+        function filterProjects(category) {
+            currentCategory = category;
+            
+            // 탭 활성화
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            displayProjects();
+        }
+
+        // 사이드바 토글
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        // 페이지 로드 시 실행
+        window.onload = function() {
+            displayProjects();
+        };
+    </script>
+</body>
+</html>
