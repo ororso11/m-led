@@ -208,7 +208,7 @@
                 // 폴백: 간단한 제품 표시
                 const grid = document.getElementById('productGrid');
                 if (products.length === 0) {
-                    grid.innerHTML = '<div style="text-align: center; padding: 50px; color: #999;">등록된 제품이 없습니다.</div>';
+                    grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 100px 20px; color: #999;"><h3 style="font-size: 24px; margin-bottom: 15px;">등록된 제품이 없습니다</h3></div>';
                     return;
                 }
                 
@@ -216,7 +216,7 @@
                     <div class="product-card" onclick="showDetail(${index})">
                         <div class="product-image">
                             <img src="${product.thumbnail}" alt="${product.name}" 
-                                 onerror="this.src='img/placeholder.jpg'">
+                                onerror="this.src='img/placeholder.jpg'">
                         </div>
                         <div class="product-info">
                             <div class="product-name">${product.name}</div>
@@ -242,14 +242,15 @@
             }
             
         } else {
+            // 데이터가 null인 경우 (Firebase에 제품이 없음)
             window.products = [];
             document.getElementById('productGrid').innerHTML = 
-                '<div style="text-align: center; padding: 50px; color: #999;">등록된 제품이 없습니다.</div>';
+                '<div style="grid-column: 1 / -1; text-align: center; padding: 100px 20px; color: #999;"><h3 style="font-size: 24px; margin-bottom: 15px;">등록된 제품이 없습니다</h3><p style="font-size: 16px; color: #aaa;">관리자 페이지에서 제품을 추가해주세요</p></div>';
         }
     }, (error) => {
         console.error('Firebase 데이터 로드 실패:', error);
         document.getElementById('productGrid').innerHTML = 
-            '<div style="text-align: center; padding: 50px; color: #f44336;">데이터 로드 실패. 잠시 후 다시 시도해주세요.</div>';
+            '<div style="grid-column: 1 / -1; text-align: center; padding: 100px 20px; color: #f44336;"><h3 style="font-size: 24px; margin-bottom: 15px;">데이터 로드 실패</h3><p>잠시 후 다시 시도해주세요</p></div>';
     });
 
     // 간단한 필터 적용 함수 (script.js가 없을 경우 폴백)
@@ -288,7 +289,7 @@
         // 필터링된 제품 표시
         const grid = document.getElementById('productGrid');
         if (filtered.length === 0) {
-            grid.innerHTML = '<div style="text-align: center; padding: 50px; color: #999;">해당 조건의 제품이 없습니다.</div>';
+            grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 100px 20px; color: #999;"><h3 style="font-size: 24px; margin-bottom: 15px;">해당 조건의 제품이 없습니다</h3><p style="font-size: 16px; color: #aaa;">다른 조건으로 검색해 보세요</p></div>';
             return;
         }
         
@@ -298,7 +299,7 @@
                 <div class="product-card" onclick="showDetail(${index})">
                     <div class="product-image">
                         <img src="${product.thumbnail}" alt="${product.name}" 
-                             onerror="this.src='img/placeholder.jpg'">
+                            onerror="this.src='img/placeholder.jpg'">
                     </div>
                     <div class="product-info">
                         <div class="product-name">${product.name}</div>

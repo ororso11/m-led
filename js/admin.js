@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Firebase Storage에 이미지 업로드
+// Firebase Storage에 이미지 업로드 (수정됨)
 async function uploadImageToFirebase(file, folder) {
     try {
         if (!storage) {
@@ -98,20 +98,31 @@ async function uploadImageToFirebase(file, folder) {
         
         const timestamp = Date.now();
         const filename = `${timestamp}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+        
+        // ✅ 올바른 방식: firebase.storage()를 통해 ref 생성
         const storageRef = firebase.storage().ref(`${folder}/${filename}`);
+        
+        console.log('📤 업로드 시작:', folder, filename);
+        
+        // 업로드 실행
         const uploadTask = storageRef.put(file);
         
         // 업로드 완료 대기
-        const snapshot = await uploadTask;
+        await uploadTask;
         
-        // 다운로드 URL 가져오기
-        const downloadURL = await snapshot.ref.getDownloadURL();
+        // ✅ getDownloadURL()로 공개 URL 가져오기 (CORS 문제 해결)
+        const downloadURL = await storageRef.getDownloadURL();
         
-        console.log('✅ 이미지 업로드 성공:', downloadURL);
+        console.log('✅ 업로드 완료:', downloadURL);
         return downloadURL;
         
     } catch (error) {
-        console.error('Upload error:', error);
+        console.error('❌ 업로드 실패:', error);
+        console.error('Error details:', {
+            code: error.code,
+            message: error.message,
+            serverResponse: error.serverResponse
+        });
         throw error;
     }
 }
