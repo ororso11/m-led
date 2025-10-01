@@ -1,12 +1,12 @@
 // Firebase 설정값
 const firebaseConfig = {
-    apiKey: "AIzaSyD8VMGmpxgZlzseyFQvoVRhYNcOnt5UvHc",
-    authDomain: "catalog-led.firebaseapp.com",
-    projectId: "catalog-led",
-    storageBucket: "catalog-led.appspot.com", // ✅ 수정됨
-    databaseURL: "https://catalog-led-default-rtdb.firebaseio.com",
-    messagingSenderId: "318647402713",
-    appId: "1:318647402713:web:517a01d812cee038897ec8"
+  apiKey: "AIzaSyD8VMGmpxgZlzseyFQvoVRhYNcOnt5UvHc",
+  authDomain: "catalog-led.firebaseapp.com",
+  databaseURL: "https://catalog-led-default-rtdb.firebaseio.com",
+  projectId: "catalog-led",
+  storageBucket: "catalog-led.firebasestorage.app",
+  messagingSenderId: "318647402713",
+  appId: "1:318647402713:web:517a01d812cee038897ec8"
 };
 
 // Firebase 초기화
