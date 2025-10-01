@@ -98,9 +98,7 @@ async function uploadImageToFirebase(file, folder) {
         
         const timestamp = Date.now();
         const filename = `${timestamp}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-        const storageRef = storage.ref(`${folder}/${filename}`);
-        
-        // 업로드 진행상황 표시 (선택사항)
+        const storageRef = firebase.storage().ref(`${folder}/${filename}`);
         const uploadTask = storageRef.put(file);
         
         // 업로드 완료 대기
