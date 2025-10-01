@@ -4,7 +4,7 @@ const firebaseConfig = {
     authDomain: "catalog-led.firebaseapp.com",
     projectId: "catalog-led",
     storageBucket: "catalog-led.firebasestorage.app",
-    databaseURL: "https://catalog-led-default-rtdb.asia-southeast1.firebasedatabase.app",
+    databaseURL: "https://catalog-led-default-rtdb.firebaseio.com",
     messagingSenderId: "318647402713",
     appId: "1:318647402713:web:517a01d812cee038897ec8"
 };
