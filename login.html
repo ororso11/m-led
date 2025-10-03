@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 로그인 - INTECH LIGHTING</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .login-header p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .error-message {
+            display: none;
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-size: 14px;
+            text-align: center;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        .logout-btn {
+            display: none;
+            width: 100%;
+            padding: 12px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>관리자 로그인</h1>
+            <p>INTECH LIGHTING 제품 관리 시스템</p>
+        </div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">이메일</label>
+                <input type="email" id="email" placeholder="admin@example.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">비밀번호</label>
+                <input type="password" id="password" placeholder="비밀번호 입력" required>
+            </div>
+            
+            <button type="submit" class="login-btn" id="loginBtn">로그인</button>
+            
+            <div id="errorMessage" class="error-message"></div>
+        </form>
+        
+        <button onclick="logout()" class="logout-btn" id="logoutBtn">로그아웃</button>
+        
+        <div class="back-link">
+            <a href="index.html">홈으로 돌아가기</a>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    
+    <script>
+    const loginForm = document.getElementById('loginForm');
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const errorMessage = document.getElementById('errorMessage');
+    
+    // 이미 로그인되어 있는지 체크
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            // 이미 로그인됨
+            loginForm.style.display = 'none';
+            logoutBtn.style.display = 'block';
+            errorMessage.textContent = '이미 로그인되어 있습니다. 관리자 페이지로 이동합니다...';
+            errorMessage.classList.add('show');
+            errorMessage.style.background = '#e8f5e9';
+            errorMessage.style.color = '#2e7d32';
+            
+            setTimeout(() => {
+                window.location.href = 'admin.html';
+            }, 1500);
+        }
+    });
+    
+    // 로그인 폼 제출
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        
+        loginBtn.disabled = true;
+        loginBtn.textContent = '로그인 중...';
+        errorMessage.classList.remove('show');
+        
+        try {
+            await firebase.auth().signInWithEmailAndPassword(email, password);
+            
+            // 로그인 성공
+            errorMessage.textContent = '로그인 성공! 관리자 페이지로 이동합니다...';
+            errorMessage.style.background = '#e8f5e9';
+            errorMessage.style.color = '#2e7d32';
+            errorMessage.classList.add('show');
+            
+            setTimeout(() => {
+                window.location.href = 'admin.html';
+            }, 1000);
+            
+        } catch (error) {
+            // 로그인 실패
+            let errorMsg = '로그인에 실패했습니다.';
+            
+            switch (error.code) {
+                case 'auth/invalid-email':
+                    errorMsg = '올바른 이메일 형식이 아닙니다.';
+                    break;
+                case 'auth/user-not-found':
+                    errorMsg = '등록되지 않은 사용자입니다.';
+                    break;
+                case 'auth/wrong-password':
+                    errorMsg = '비밀번호가 일치하지 않습니다.';
+                    break;
+                case 'auth/invalid-credential':
+                    errorMsg = '이메일 또는 비밀번호가 올바르지 않습니다.';
+                    break;
+                case 'auth/too-many-requests':
+                    errorMsg = '로그인 시도가 너무 많습니다. 잠시 후 다시 시도하세요.';
+                    break;
+            }
+            
+            errorMessage.textContent = errorMsg;
+            errorMessage.style.background = '#fee';
+            errorMessage.style.color = '#c33';
+            errorMessage.classList.add('show');
+            
+            loginBtn.disabled = false;
+            loginBtn.textContent = '로그인';
+        }
+    });
+    
+    // 로그아웃
+    function logout() {
+        firebase.auth().signOut().then(() => {
+            location.reload();
+        });
+    }
+    </script>
+</body>
+</html>

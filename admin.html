@@ -11,11 +11,12 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 </head>
 <body>
     <div class="container">
         <h1>🔧 제품 관리 시스템 (Firebase 실시간 버전)</h1>
-        
+        <button onclick="logout()" style="float: right; padding: 8px 15px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer;">로그아웃</button>
         <div id="syncStatus" class="sync-status disconnected">
             Firebase 연결 중...
         </div>
@@ -191,6 +192,34 @@
     <!-- Firebase 설정 파일 -->
     <script src="js/firebase-config.js"></script>
     
+    <script>
+
+    function logout() {
+        if (confirm('로그아웃 하시겠습니까?')) {
+            firebase.auth().signOut().then(() => {
+                window.location.href = 'login.html';
+            });
+        }
+    }
+
+
+    // 페이지 전체 숨기기
+    document.body.style.display = 'none';
+    
+    // Firebase Auth 체크
+    firebase.auth().onAuthStateChanged((user) => {
+        if (!user) {
+            // 로그인 안 됨
+            alert('관리자 로그인이 필요합니다.');
+            window.location.href = 'login.html';
+        } else {
+            // 로그인됨 - 페이지 표시
+            document.body.style.display = 'block';
+            console.log('인증된 관리자:', user.email);
+        }
+    });
+    </script>
+
     <!-- admin.js -->
     <script src="js/admin.js"></script>
 </body>

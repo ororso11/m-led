@@ -53,3 +53,6 @@ console.log('Firebase Config:', {
     storageBucket: firebaseConfig.storageBucket,
     databaseURL: firebaseConfig.databaseURL
 });
+
+// 기존 코드 아래에 추가
+const auth = firebase.auth();
