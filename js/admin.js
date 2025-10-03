@@ -60,12 +60,24 @@ async function saveSettings() {
 // 카테고리 렌더링
 function renderCategories() {
     ['watt', 'cct', 'ip'].forEach(type => {
-        const select = document.getElementById(`category${type.charAt(0).toUpperCase() + type.slice(1)}`);
-        if (!select) return;
+        const capitalType = type.charAt(0).toUpperCase() + type.slice(1);
         
-        select.innerHTML = categories[type].map(value => 
-            `<option value="${value}">${value}</option>`
-        ).join('');
+        // 제품 등록용 select (드롭다운)
+        const select = document.getElementById(`category${capitalType}`);
+        if (select) {
+            select.innerHTML = '<option value="">선택하세요</option>' + 
+                categories[type].map(value => 
+                    `<option value="${value}">${value}</option>`
+                ).join('');
+        }
+        
+        // 삭제용 select (리스트)
+        const deleteSelect = document.getElementById(`category${capitalType}Delete`);
+        if (deleteSelect) {
+            deleteSelect.innerHTML = categories[type].map(value => 
+                `<option value="${value}">${value}</option>`
+            ).join('');
+        }
     });
 }
 
@@ -93,7 +105,8 @@ window.addCategory = async function(type) {
 
 // 카테고리 삭제
 window.deleteCategory = async function(type) {
-    const select = document.getElementById(`category${type.charAt(0).toUpperCase() + type.slice(1)}`);
+    const capitalType = type.charAt(0).toUpperCase() + type.slice(1);
+    const select = document.getElementById(`category${capitalType}Delete`);
     const selectedValue = select.value;
     
     if (!selectedValue) {
