@@ -336,24 +336,6 @@ function showDetail(index) {
 
         ${tableHTML}
 
-        <div class="cert-icons">
-            <div class="cert-icon">DALI</div>
-            <div class="cert-icon">KC</div>
-            <div class="cert-icon">CE</div>
-            <div class="cert-icon">SELV</div>
-            <div class="cert-icon">📦</div>
-            <div class="cert-icon">♻️</div>
-        </div>
-
-        <div class="download-section">
-            <h3>Download</h3>
-            <div class="download-btns">
-                <button class="download-btn">SPEC DATA</button>
-                <button class="download-btn">IES</button>
-                <button class="download-btn">CERTIFICATE</button>
-                <button class="download-btn">CAD</button>
-            </div>
-        </div>
     `;
 
     // 페이지 전환
