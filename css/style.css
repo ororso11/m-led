@@ -149,6 +149,16 @@ nav a:hover {
     font-size: 14px;
 }
 
+.filter-group label.highlighted {
+    animation: highlight 0.5s ease;
+}
+
+@keyframes highlight {
+    0% { background: transparent; }
+    50% { background: #ffeb3b; }
+    100% { background: transparent; }
+}
+
 .filter-group input[type="checkbox"] {
     margin-right: 8px;
 }
@@ -175,56 +185,111 @@ nav a:hover {
 /* Product Grid */
 .product-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 20px;
+    padding: 20px 0;
 }
 
+/* 제품 카드 */
 .product-card {
-    background: #fff;
-    border-radius: 8px;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 0;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    transition: transform 0.3s;
     cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
 }
 
 .product-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
 }
 
+/* 제품 이미지 영역 */
 .product-image {
     width: 100%;
-    height: 200px;
-    background: #e0e0e0;
+    height: 240px;
+    background: #f8f8f8;
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
     overflow: hidden;
+    border-bottom: 1px solid #e0e0e0;
 }
 
 .product-image img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-}
-
-.product-info {
+    object-fit: contain;
     padding: 20px;
 }
 
-.product-name {
-    font-size: 14px;
-    font-weight: bold;
-    margin-bottom: 10px;
-    color: #333;
+/* 제품 정보 영역 */
+.product-info {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
+/* 제품명 */
+.product-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    line-height: 1.4;
+    margin-bottom: 8px;
+}
+
+/* 제품 사양 */
 .product-specs {
-    font-size: 12px;
+    font-size: 13px;
     color: #666;
     line-height: 1.6;
+}
+
+/* 제품 번호 */
+.product-number {
+    font-size: 12px;
+    color: #999;
+    margin-top: 4px;
+}
+
+/* 카테고리 버튼들 */
+.category-buttons {
+    display: flex;
+    gap: 6px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+.category-btn {
+    padding: 4px 10px;
+    font-size: 11px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.category-btn:hover {
+    opacity: 0.8;
+    transform: scale(1.05);
+}
+
+/* Empty State */
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 100px 20px;
+    color: #999;
+}
+
+.empty-state h3 {
+    font-size: 24px;
+    margin-bottom: 15px;
 }
 
 /* Detail Page */
@@ -800,13 +865,17 @@ footer {
     }
 
     .product-grid {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 16px;
+    }
+
+    .product-image {
+        height: 200px;
     }
 }
 
 /* Mobile */
 @media (max-width: 768px) {
-    /* Header Mobile */
     header {
         display: grid;
         grid-template-columns: auto 1fr;
@@ -869,7 +938,6 @@ footer {
         display: none;
     }
 
-    /* Sidebar Mobile */
     .sidebar {
         position: fixed;
         left: -250px;
@@ -883,7 +951,6 @@ footer {
         left: 0;
     }
 
-    /* Main Content Mobile */
     .container {
         flex-direction: column;
     }
@@ -897,38 +964,27 @@ footer {
         margin-bottom: 20px;
     }
 
-    /* Product Grid Mobile */
     .product-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 12px;
-        padding: 0 10px;
     }
-
-    .product-card {
-        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    }
-
+    
     .product-image {
-        height: 160px;
+        height: 180px;
     }
-
+    
     .product-info {
-        padding: 12px;
+        padding: 15px;
     }
-
+    
     .product-name {
-        font-size: 13px;
-        margin-bottom: 8px;
-        line-height: 1.3;
-        word-break: keep-all;
+        font-size: 14px;
     }
-
+    
     .product-specs {
-        font-size: 11px;
-        line-height: 1.5;
+        font-size: 12px;
     }
 
-    /* Detail Page Mobile */
     .detail-header {
         padding: 15px;
         position: sticky;
@@ -976,7 +1032,6 @@ footer {
         word-break: keep-all;
     }
 
-    /* Table Mobile */
     .detail-table {
         width: 100%;
         display: block;
@@ -1007,7 +1062,6 @@ footer {
         font-size: 10px;
     }
 
-    /* Cert Icons Mobile */
     .cert-icons {
         justify-content: center;
         gap: 10px;
@@ -1023,7 +1077,6 @@ footer {
         background: #f9f9f9;
     }
 
-    /* Download Buttons Mobile */
     .download-btns {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
@@ -1039,7 +1092,6 @@ footer {
         grid-template-columns: 1fr;
     }
 
-    /* Project Page Mobile */
     .project-page-title {
         font-size: 32px;
         margin: 40px 0 30px;
@@ -1068,7 +1120,6 @@ footer {
         font-size: 16px;
     }
 
-    /* Inquiry Page Mobile */
     .inquiry-page-title {
         font-size: 32px;
         margin: 40px 0 15px;
@@ -1106,7 +1157,6 @@ footer {
         font-size: 15px;
     }
 
-    /* Scroll to Top Mobile */
     .scroll-to-top {
         width: 45px;
         height: 45px;
@@ -1114,7 +1164,6 @@ footer {
         right: 20px;
     }
 
-    /* Pagination Mobile */
     .pagination-container {
         margin-top: 30px;
         margin-bottom: 20px;
@@ -1136,7 +1185,6 @@ footer {
         padding: 0 3px;
     }
 
-    /* Footer Mobile */
     footer {
         padding: 30px 20px 20px;
     }
@@ -1159,29 +1207,14 @@ footer {
         grid-template-columns: 1fr;
     }
 
-    /* 플립폰은 2열 유지 */
     .product-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
+        grid-template-columns: 1fr;
     }
     
     .product-image {
-        height: 140px;
-    }
-    
-    .product-info {
-        padding: 10px;
-    }
-    
-    .product-name {
-        font-size: 12px;
-    }
-    
-    .product-specs {
-        font-size: 10px;
+        height: 220px;
     }
 
-    /* 나머지는 그대로 */
     .detail-main-image img {
         max-height: 250px;
     }
@@ -1195,21 +1228,4 @@ footer {
         grid-template-columns: repeat(3, 1fr);
         gap: 10px;
     }
-}
-
-/* 카테고리 버튼 스타일 */
-.category-btn:hover {
-    opacity: 0.8;
-    transform: scale(1.05);
-}
-
-/* 필터 하이라이트 애니메이션 */
-.filter-group label.highlighted {
-    animation: highlight 0.5s ease;
-}
-
-@keyframes highlight {
-    0% { background: transparent; }
-    50% { background: #ffeb3b; }
-    100% { background: transparent; }
 }

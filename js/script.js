@@ -8,7 +8,7 @@ let selectedFilters = {
 };
 let searchKeyword = '';
 let currentPage = 1;
-const itemsPerPage = 10; // 5x6 = 30개로 변경
+const itemsPerPage = 30; // 5x6 = 30개로 변경
 
 // ========================================
 // 제품 필터링 함수

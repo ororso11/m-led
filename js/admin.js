@@ -1,8 +1,5 @@
 // admin.js - Firebase 버전
 
-// Firebase는 firebase-config.js에서 이미 초기화됨
-// database와 storage 변수도 firebase-config.js에서 정의됨
-
 // 전역 변수
 let products = [];
 let specsList = [];
@@ -13,7 +10,6 @@ let editingKey = null;
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Admin panel initializing...');
     
-    // 로딩 메시지 숨기기
     const loadingMessage = document.getElementById('loadingMessage');
     if (loadingMessage) loadingMessage.style.display = 'none';
     
@@ -39,7 +35,6 @@ document.addEventListener('DOMContentLoaded', function() {
         database.ref('products').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
-                // Firebase 데이터를 배열로 변환
                 products = [];
                 const keys = Object.keys(data);
                 keys.forEach(key => {
@@ -51,7 +46,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 console.log('✅ Firebase 데이터 로드:', products.length, '개 제품');
                 
-                // 현재 활성 탭 새로고침
                 const activeTab = document.querySelector('.tab.active');
                 if (activeTab) {
                     const tabName = activeTab.getAttribute('data-tab');
@@ -62,7 +56,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 products = [];
                 console.log('제품 데이터 없음');
                 
-                // 빈 상태 표시
                 const activeTab = document.querySelector('.tab.active');
                 if (activeTab) {
                     const tabName = activeTab.getAttribute('data-tab');
@@ -82,14 +75,13 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Firebase database not initialized');
     }
     
-    // 폼 제출 이벤트 리스너
     const form = document.getElementById('productForm');
     if (form) {
         form.addEventListener('submit', handleSubmit);
     }
 });
 
-// Firebase Storage에 이미지 업로드 (수정됨)
+// Firebase Storage에 이미지 업로드
 async function uploadImageToFirebase(file, folder) {
     try {
         if (!storage) {
@@ -98,19 +90,13 @@ async function uploadImageToFirebase(file, folder) {
         
         const timestamp = Date.now();
         const filename = `${timestamp}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-        
-        // ✅ 올바른 방식: firebase.storage()를 통해 ref 생성
         const storageRef = firebase.storage().ref(`${folder}/${filename}`);
         
         console.log('📤 업로드 시작:', folder, filename);
         
-        // 업로드 실행
         const uploadTask = storageRef.put(file);
-        
-        // 업로드 완료 대기
         await uploadTask;
         
-        // ✅ getDownloadURL()로 공개 URL 가져오기 (CORS 문제 해결)
         const downloadURL = await storageRef.getDownloadURL();
         
         console.log('✅ 업로드 완료:', downloadURL);
@@ -135,11 +121,10 @@ window.editProduct = function(index) {
     editingIndex = index;
     editingKey = product._key;
     
-    // 폼에 기존 데이터 채우기
     document.getElementById('productName').value = product.name || '';
+    document.getElementById('productNumber').value = product.productNumber || '';
     document.getElementById('productSpecs').value = product.specs || '';
     
-    // 테이블 데이터
     if (product.tableData) {
         document.getElementById('tableItem').value = product.tableData.item || '';
         document.getElementById('tableVoltage').value = product.tableData.voltage || '';
@@ -150,26 +135,21 @@ window.editProduct = function(index) {
         document.getElementById('tableGuarantee').value = product.tableData.guarantee || '';
     }
     
-    // 카테고리
     if (product.categories) {
         document.getElementById('categoryWatt').value = product.categories.watt || '';
         document.getElementById('categoryCCT').value = product.categories.cct || '';
         document.getElementById('categoryIP').value = product.categories.ip || '';
     }
     
-    // 스펙 리스트
     specsList = product.specsList || [];
     updateSpecsList();
     
-    // 파일 입력 필수 속성 제거 (수정 시에는 선택사항)
     document.getElementById('thumbnailInput').removeAttribute('required');
     document.getElementById('detailImagesInput').removeAttribute('required');
     
-    // 제출 버튼 텍스트 변경
     const submitBtn = document.querySelector('.submit-btn');
     submitBtn.textContent = '제품 수정 완료';
     
-    // 추가 탭으로 이동
     showTab('add');
     
     alert('제품 정보를 수정한 후 "제품 수정 완료" 버튼을 클릭하세요.\n(이미지를 변경하지 않으려면 파일을 선택하지 마세요)');
@@ -185,9 +165,7 @@ window.deleteProduct = async function(index) {
         
         const product = products[index];
         if (product._key) {
-            // Firebase에서 삭제
             await database.ref(`products/${product._key}`).remove();
-            
             alert('✅ 제품이 삭제되었습니다! (즉시 반영)');
         }
         
@@ -216,7 +194,8 @@ function loadManagementList() {
                      style="width: 100%; height: 200px; object-fit: cover;"
                      onerror="this.src='img/placeholder.jpg';">
                 <div style="padding: 15px;">
-                    <h4 style="margin: 0 0 10px 0;">${product.name}</h4>
+                    <h4 style="margin: 0 0 5px 0;">${product.name}</h4>
+                    ${product.productNumber ? `<p style="margin: 0 0 10px 0; color: #999; font-size: 12px;">${product.productNumber}</p>` : ''}
                     <p style="margin: 0 0 10px 0; color: #666; font-size: 13px;">${product.specs ? product.specs.replace(/\n/g, ' / ') : ''}</p>
                     <small style="color: #999; display: block; margin-bottom: 15px;">
                         ${product.categories ? `${product.categories.watt || ''} / ${product.categories.cct || ''} / ${product.categories.ip || ''}` : ''}
@@ -306,7 +285,6 @@ async function handleSubmit(e) {
     const thumbnailInput = document.getElementById('thumbnailInput');
     const detailImagesInput = document.getElementById('detailImagesInput');
     
-    // 수정 모드가 아닌 경우에만 파일 필수 체크
     if (editingIndex === null) {
         if (!thumbnailInput.files.length || !detailImagesInput.files.length) {
             alert('썸네일과 상세 이미지를 모두 업로드해주세요.');
@@ -323,14 +301,12 @@ async function handleSubmit(e) {
         if (editingIndex !== null) {
             const currentProduct = products[editingIndex];
             
-            // 새 썸네일이 있으면 업로드
             if (thumbnailInput.files.length > 0) {
                 thumbnailPath = await uploadImageToFirebase(thumbnailInput.files[0], 'thumbnails');
             } else {
                 thumbnailPath = currentProduct.thumbnail;
             }
             
-            // 새 상세 이미지가 있으면 업로드
             if (detailImagesInput.files.length > 0) {
                 const detailFiles = Array.from(detailImagesInput.files);
                 for (const file of detailFiles) {
@@ -341,9 +317,9 @@ async function handleSubmit(e) {
                 detailPaths = currentProduct.detailImages;
             }
             
-            // 제품 데이터 업데이트
             const updatedProduct = {
                 name: document.getElementById('productName').value,
+                productNumber: document.getElementById('productNumber').value || '',
                 thumbnail: thumbnailPath,
                 detailImages: detailPaths,
                 specs: document.getElementById('productSpecs').value,
@@ -365,17 +341,14 @@ async function handleSubmit(e) {
                 updatedAt: firebase.database.ServerValue.TIMESTAMP
             };
             
-            // Firebase에 업데이트
             await database.ref(`products/${editingKey}`).update(updatedProduct);
             
             alert('✅ 제품이 수정되었습니다! (즉시 반영)');
             
-            // 수정 모드 종료
             editingIndex = null;
             editingKey = null;
             document.querySelector('.submit-btn').textContent = '제품 추가';
             
-            // 파일 입력 다시 필수로
             thumbnailInput.setAttribute('required', 'required');
             detailImagesInput.setAttribute('required', 'required');
             
@@ -391,6 +364,7 @@ async function handleSubmit(e) {
             
             const productData = {
                 name: document.getElementById('productName').value,
+                productNumber: document.getElementById('productNumber').value || '',
                 thumbnail: thumbnailPath,
                 detailImages: detailPaths,
                 specs: document.getElementById('productSpecs').value,
@@ -412,20 +386,17 @@ async function handleSubmit(e) {
                 createdAt: firebase.database.ServerValue.TIMESTAMP
             };
             
-            // Firebase에 추가
             await database.ref('products').push(productData);
             
             alert('✅ 제품이 추가되었습니다! (즉시 반영)');
         }
         
-        // 폼 초기화
         document.getElementById('productForm').reset();
         document.getElementById('thumbnailPreview').innerHTML = '';
         document.getElementById('detailImagesPreview').innerHTML = '';
         specsList = [];
         updateSpecsList();
         
-        // 성공 메시지 표시
         document.getElementById('successMessage').style.display = 'block';
         setTimeout(() => {
             document.getElementById('successMessage').style.display = 'none';
@@ -441,29 +412,24 @@ async function handleSubmit(e) {
 
 // 탭 전환 함수
 window.showTab = function(tabName) {
-    // 모든 탭 내용 숨기기
     document.querySelectorAll('.tab-content').forEach(content => {
         content.classList.remove('active');
     });
     
-    // 모든 탭 버튼 비활성화
     document.querySelectorAll('.tab').forEach(tab => {
         tab.classList.remove('active');
     });
     
-    // 선택한 탭 활성화
     const tabContent = document.getElementById(tabName + 'Tab');
     if (tabContent) {
         tabContent.classList.add('active');
     }
     
-    // 선택한 버튼 활성화
     const tabButton = document.querySelector(`[data-tab="${tabName}"]`);
     if (tabButton) {
         tabButton.classList.add('active');
     }
     
-    // 각 탭별 추가 동작
     if (tabName === 'list') {
         loadProductList();
     } else if (tabName === 'manage') {
@@ -489,7 +455,8 @@ function loadProductList() {
                      style="width: 80px; height: 80px; object-fit: cover; margin-right: 20px; border-radius: 5px;"
                      onerror="this.src='img/placeholder.jpg';">
                 <div>
-                    <h4 style="margin: 0 0 10px 0;">${product.name}</h4>
+                    <h4 style="margin: 0 0 5px 0;">${product.name}</h4>
+                    ${product.productNumber ? `<p style="margin: 0 0 5px 0; color: #999; font-size: 12px;">${product.productNumber}</p>` : ''}
                     <p style="margin: 0; color: #666; font-size: 14px;">${product.specs ? product.specs.replace(/\n/g, ' / ') : ''}</p>
                     <small style="color: #999;">
                         ${product.categories ? `${product.categories.watt || ''} / ${product.categories.cct || ''} / ${product.categories.ip || ''}` : ''}
