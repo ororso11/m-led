@@ -1,4 +1,4 @@
-// admin.js - Firebase 버전 (완전 동적)
+// admin.js - Firebase 버전 (완전 동적 - 카테고리 타입도 동적)
 
 // 전역 변수
 let products = [];
@@ -8,9 +8,18 @@ let editingKey = null;
 
 // 기본 카테고리 및 테이블 컬럼 설정
 let categories = {
-    watt: ['0-5W', '6-10W', '11-15W', '16-20W', '21-25W', '26-30W', '30W+'],
-    cct: ['2400K', '2700K', '3000K', '3500K', '4000K', '5700K', '6000K', '6500K', 'TW', 'RGB', 'RGBW'],
-    ip: ['IP20', 'IP44', 'IP54', 'IP65', 'IP66', 'IP67', 'IP68']
+    watt: {
+        label: 'WATT',
+        values: ['0-5W', '6-10W', '11-15W', '16-20W', '21-25W', '26-30W', '30W+']
+    },
+    cct: {
+        label: 'CCT',
+        values: ['2400K', '2700K', '3000K', '3500K', '4000K', '5700K', '6000K', '6500K', 'TW', 'RGB', 'RGBW']
+    },
+    ip: {
+        label: 'IP등급',
+        values: ['IP20', 'IP44', 'IP54', 'IP65', 'IP66', 'IP67', 'IP68']
+    }
 };
 
 let tableColumns = [
@@ -34,11 +43,11 @@ async function loadSettings() {
             if (data.tableColumns) tableColumns = data.tableColumns;
         }
         
-        renderCategories();
+        renderCategoryTypes();
         renderTableColumns();
     } catch (error) {
         console.error('설정 로드 실패:', error);
-        renderCategories();
+        renderCategoryTypes();
         renderTableColumns();
     }
 }
@@ -51,60 +60,102 @@ async function saveSettings() {
             tableColumns,
             updatedAt: firebase.database.ServerValue.TIMESTAMP
         });
-        console.log('✅ 설정 저장 완료');
+        console.log('설정 저장 완료');
     } catch (error) {
         console.error('설정 저장 실패:', error);
     }
 }
 
-// 카테고리 렌더링
-function renderCategories() {
-    // ID 매핑 (HTML의 실제 ID와 정확히 일치)
-    const typeToId = {
-        'watt': 'Watt',
-        'cct': 'CCT',
-        'ip': 'IP'
-    };
+// 카테고리 타입 렌더링
+function renderCategoryTypes() {
+    const container = document.getElementById('categoryTypesContainer');
+    if (!container) return;
     
-    ['watt', 'cct', 'ip'].forEach(type => {
-        const idSuffix = typeToId[type];
-        
-        // 제품 등록용 select (드롭다운)
-        const select = document.getElementById(`category${idSuffix}`);
-        if (select) {
-            select.innerHTML = '<option value="">선택하세요</option>' + 
-                categories[type].map(value => 
-                    `<option value="${value}">${value}</option>`
-                ).join('');
-        }
-        
-        // 삭제용 select (리스트)
-        const deleteSelect = document.getElementById(`category${idSuffix}Delete`);
-        if (deleteSelect) {
-            deleteSelect.innerHTML = categories[type].map(value => 
-                `<option value="${value}">${value}</option>`
-            ).join('');
-        }
-    });
+    const categoryKeys = Object.keys(categories);
+    
+    container.innerHTML = categoryKeys.map(key => {
+        const cat = categories[key];
+        return `
+            <div class="form-group" style="border: 1px solid #ddd; padding: 15px; border-radius: 8px; background: #f9f9f9;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <label style="margin: 0; font-weight: bold;">${cat.label} 카테고리 선택</label>
+                    <button type="button" onclick="deleteCategoryType('${key}')" 
+                            style="padding: 4px 12px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                        타입 삭제
+                    </button>
+                </div>
+                <select id="category${key}" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+                    <option value="">선택하세요</option>
+                    ${cat.values.map(value => `<option value="${value}">${value}</option>`).join('')}
+                </select>
+                
+                <label style="margin-top: 15px; display: block; font-size: 13px; color: #666;">${cat.label} 카테고리 관리</label>
+                <div style="display: flex; gap: 5px; margin-bottom: 8px;">
+                    <input type="text" id="new${key}Category" placeholder="예: 새 값" style="flex: 1; padding: 6px; font-size: 13px;">
+                    <button type="button" onclick="addCategoryValue('${key}')" 
+                            style="padding: 6px 10px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                        추가
+                    </button>
+                </div>
+                <select id="category${key}Delete" size="4" style="width: 100%; font-size: 12px; margin-bottom: 5px;">
+                    ${cat.values.map(value => `<option value="${value}">${value}</option>`).join('')}
+                </select>
+                <button type="button" onclick="deleteCategoryValue('${key}')" 
+                        style="width: 100%; padding: 5px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                    선택 항목 삭제
+                </button>
+            </div>
+        `;
+    }).join('');
 }
 
-// 카테고리 추가
-window.addCategory = async function(type) {
-    // ID 매핑 (HTML의 실제 ID와 정확히 일치)
-    const inputIds = {
-        'watt': 'newWattCategory',
-        'cct': 'newCCTCategory',
-        'ip': 'newIPCategory'
-    };
+// 카테고리 타입 추가
+window.addCategoryType = async function() {
+    const keyInput = document.getElementById('newCategoryTypeKey');
+    const labelInput = document.getElementById('newCategoryTypeLabel');
     
-    const input = document.getElementById(inputIds[type]);
+    const key = keyInput.value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+    const label = labelInput.value.trim();
     
-    if (!input) {
-        console.error(`Input not found for type: ${type}, looking for ID: ${inputIds[type]}`);
-        alert('입력 필드를 찾을 수 없습니다.');
+    if (!key || !label) {
+        alert('카테고리 ID와 이름을 모두 입력하세요.');
         return;
     }
     
+    if (categories[key]) {
+        alert('이미 존재하는 카테고리 ID입니다.');
+        return;
+    }
+    
+    categories[key] = {
+        label: label,
+        values: []
+    };
+    
+    await saveSettings();
+    renderCategoryTypes();
+    keyInput.value = '';
+    labelInput.value = '';
+    alert(`"${label}" 카테고리 타입이 추가되었습니다.`);
+}
+
+// 카테고리 타입 삭제
+window.deleteCategoryType = async function(key) {
+    const cat = categories[key];
+    
+    if (!confirm(`"${cat.label}" 카테고리 타입을 완전히 삭제하시겠습니까?\n(모든 하위 값도 함께 삭제됩니다)`)) {
+        return;
+    }
+    
+    delete categories[key];
+    await saveSettings();
+    renderCategoryTypes();
+    alert(`"${cat.label}" 카테고리 타입이 삭제되었습니다.`);
+}
+
+// 카테고리 값 추가
+window.addCategoryValue = async function(key) {
+    const input = document.getElementById(`new${key}Category`);
     const value = input.value.trim();
     
     if (!value) {
@@ -112,36 +163,20 @@ window.addCategory = async function(type) {
         return;
     }
     
-    if (categories[type].includes(value)) {
+    if (categories[key].values.includes(value)) {
         alert('이미 존재하는 카테고리입니다.');
         return;
     }
     
-    categories[type].push(value);
+    categories[key].values.push(value);
     await saveSettings();
-    renderCategories();
-    input.value = '';
-    alert(`✅ "${value}" 카테고리가 추가되었습니다.`);
+    renderCategoryTypes();
+    alert(`"${value}" 카테고리가 추가되었습니다.`);
 }
 
-// 카테고리 삭제
-window.deleteCategory = async function(type) {
-    // ID 매핑 (HTML의 실제 ID와 정확히 일치)
-    const typeToId = {
-        'watt': 'Watt',
-        'cct': 'CCT',
-        'ip': 'IP'
-    };
-    
-    const idSuffix = typeToId[type];
-    const select = document.getElementById(`category${idSuffix}Delete`);
-    
-    if (!select) {
-        console.error(`Select not found for type: ${type}, looking for ID: category${idSuffix}Delete`);
-        alert('삭제 목록을 찾을 수 없습니다.');
-        return;
-    }
-    
+// 카테고리 값 삭제
+window.deleteCategoryValue = async function(key) {
+    const select = document.getElementById(`category${key}Delete`);
     const selectedValue = select.value;
     
     if (!selectedValue) {
@@ -153,10 +188,10 @@ window.deleteCategory = async function(type) {
         return;
     }
     
-    categories[type] = categories[type].filter(v => v !== selectedValue);
+    categories[key].values = categories[key].values.filter(v => v !== selectedValue);
     await saveSettings();
-    renderCategories();
-    alert(`✅ "${selectedValue}" 카테고리가 삭제되었습니다.`);
+    renderCategoryTypes();
+    alert(`"${selectedValue}" 카테고리가 삭제되었습니다.`);
 }
 
 // 테이블 컬럼 렌더링
@@ -204,7 +239,7 @@ window.addTableColumn = async function() {
     await saveSettings();
     renderTableColumns();
     input.value = '';
-    alert(`✅ "${label}" 항목이 추가되었습니다.`);
+    alert(`"${label}" 항목이 추가되었습니다.`);
 }
 
 // 테이블 컬럼 삭제
@@ -218,7 +253,7 @@ window.deleteTableColumn = async function(id) {
     tableColumns = tableColumns.filter(col => col.id !== id);
     await saveSettings();
     renderTableColumns();
-    alert(`✅ "${column.label}" 항목이 삭제되었습니다.`);
+    alert(`"${column.label}" 항목이 삭제되었습니다.`);
 }
 
 // 페이지 로드 시 초기화
@@ -240,10 +275,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const syncStatus = document.getElementById('syncStatus');
             if (syncStatus) {
                 if (snapshot.val() === true) {
-                    syncStatus.textContent = '✅ Firebase 실시간 연결됨';
+                    syncStatus.textContent = 'Firebase 실시간 연결됨';
                     syncStatus.className = 'sync-status connected';
                 } else {
-                    syncStatus.textContent = '❌ Firebase 연결 끊김';
+                    syncStatus.textContent = 'Firebase 연결 끊김';
                     syncStatus.className = 'sync-status disconnected';
                 }
             }
@@ -262,7 +297,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 });
                 
-                console.log('✅ Firebase 데이터 로드:', products.length, '개 제품');
+                console.log('Firebase 데이터 로드:', products.length, '개 제품');
                 
                 const activeTab = document.querySelector('.tab.active');
                 if (activeTab) {
@@ -285,7 +320,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Firebase 데이터 로드 실패:', error);
             const syncStatus = document.getElementById('syncStatus');
             if (syncStatus) {
-                syncStatus.textContent = '❌ 데이터 로드 실패';
+                syncStatus.textContent = '데이터 로드 실패';
                 syncStatus.className = 'sync-status disconnected';
             }
         });
@@ -310,18 +345,18 @@ async function uploadImageToFirebase(file, folder) {
         const filename = `${timestamp}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
         const storageRef = firebase.storage().ref(`${folder}/${filename}`);
         
-        console.log('📤 업로드 시작:', folder, filename);
+        console.log('업로드 시작:', folder, filename);
         
         const uploadTask = storageRef.put(file);
         await uploadTask;
         
         const downloadURL = await storageRef.getDownloadURL();
         
-        console.log('✅ 업로드 완료:', downloadURL);
+        console.log('업로드 완료:', downloadURL);
         return downloadURL;
         
     } catch (error) {
-        console.error('❌ 업로드 실패:', error);
+        console.error('업로드 실패:', error);
         throw error;
     }
 }
@@ -348,9 +383,12 @@ window.editProduct = function(index) {
     }
     
     if (product.categories) {
-        document.getElementById('categoryWatt').value = product.categories.watt || '';
-        document.getElementById('categoryCCT').value = product.categories.cct || '';
-        document.getElementById('categoryIP').value = product.categories.ip || '';
+        Object.keys(categories).forEach(key => {
+            const select = document.getElementById(`category${key}`);
+            if (select && product.categories[key]) {
+                select.value = product.categories[key];
+            }
+        });
     }
     
     specsList = product.specsList || [];
@@ -378,7 +416,7 @@ window.deleteProduct = async function(index) {
         const product = products[index];
         if (product._key) {
             await database.ref(`products/${product._key}`).remove();
-            alert('✅ 제품이 삭제되었습니다! (즉시 반영)');
+            alert('제품이 삭제되었습니다!');
         }
         
     } catch (error) {
@@ -397,31 +435,34 @@ function loadManagementList() {
     if (!manageListEl) return;
     
     if (products.length > 0) {
-        manageListEl.innerHTML = products.map((product, index) => `
-            <div style="border: 1px solid #ddd; border-radius: 8px; overflow: hidden; background: white;">
-                <img src="${product.thumbnail}" alt="${product.name}" 
-                     style="width: 100%; height: 200px; object-fit: cover;"
-                     onerror="this.src='img/placeholder.jpg';">
-                <div style="padding: 15px;">
-                    <h4 style="margin: 0 0 5px 0;">${product.name}</h4>
-                    ${product.productNumber ? `<p style="margin: 0 0 10px 0; color: #999; font-size: 12px;">${product.productNumber}</p>` : ''}
-                    <p style="margin: 0 0 10px 0; color: #666; font-size: 13px;">${product.specs ? product.specs.replace(/\n/g, ' / ') : ''}</p>
-                    <small style="color: #999; display: block; margin-bottom: 15px;">
-                        ${product.categories ? `${product.categories.watt || ''} / ${product.categories.cct || ''} / ${product.categories.ip || ''}` : ''}
-                    </small>
-                    <div style="display: flex; gap: 10px;">
-                        <button onclick="editProduct(${index})" 
-                                style="flex: 1; padding: 8px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                            수정
-                        </button>
-                        <button onclick="deleteProduct(${index})" 
-                                style="flex: 1; padding: 8px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                            삭제
-                        </button>
+        manageListEl.innerHTML = products.map((product, index) => {
+            const categoryText = product.categories ? 
+                Object.keys(categories).map(key => product.categories[key] || '').filter(v => v).join(' / ') : '';
+            
+            return `
+                <div style="border: 1px solid #ddd; border-radius: 8px; overflow: hidden; background: white;">
+                    <img src="${product.thumbnail}" alt="${product.name}" 
+                         style="width: 100%; height: 200px; object-fit: cover;"
+                         onerror="this.src='img/placeholder.jpg';">
+                    <div style="padding: 15px;">
+                        <h4 style="margin: 0 0 5px 0;">${product.name}</h4>
+                        ${product.productNumber ? `<p style="margin: 0 0 10px 0; color: #999; font-size: 12px;">${product.productNumber}</p>` : ''}
+                        <p style="margin: 0 0 10px 0; color: #666; font-size: 13px;">${product.specs ? product.specs.replace(/\n/g, ' / ') : ''}</p>
+                        <small style="color: #999; display: block; margin-bottom: 15px;">${categoryText}</small>
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="editProduct(${index})" 
+                                    style="flex: 1; padding: 8px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                수정
+                            </button>
+                            <button onclick="deleteProduct(${index})" 
+                                    style="flex: 1; padding: 8px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                삭제
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     } else {
         manageListEl.innerHTML = '<p style="text-align: center; color: #999; grid-column: 1/-1;">등록된 제품이 없습니다.</p>';
     }
@@ -533,6 +574,15 @@ async function handleSubmit(e) {
                 tableData[col.id] = input ? (input.value || '-') : '-';
             });
             
+            // 카테고리 동적 수집
+            const productCategories = {};
+            Object.keys(categories).forEach(key => {
+                const select = document.getElementById(`category${key}`);
+                if (select) {
+                    productCategories[key] = select.value;
+                }
+            });
+            
             const updatedProduct = {
                 name: document.getElementById('productName').value,
                 productNumber: document.getElementById('productNumber').value || '',
@@ -541,17 +591,13 @@ async function handleSubmit(e) {
                 specs: document.getElementById('productSpecs').value,
                 specsList: specsList,
                 tableData: tableData,
-                categories: {
-                    watt: document.getElementById('categoryWatt').value,
-                    cct: document.getElementById('categoryCCT').value,
-                    ip: document.getElementById('categoryIP').value
-                },
+                categories: productCategories,
                 updatedAt: firebase.database.ServerValue.TIMESTAMP
             };
             
             await database.ref(`products/${editingKey}`).update(updatedProduct);
             
-            alert('✅ 제품이 수정되었습니다! (즉시 반영)');
+            alert('제품이 수정되었습니다!');
             
             editingIndex = null;
             editingKey = null;
@@ -577,6 +623,15 @@ async function handleSubmit(e) {
                 tableData[col.id] = input ? (input.value || '-') : '-';
             });
             
+            // 카테고리 동적 수집
+            const productCategories = {};
+            Object.keys(categories).forEach(key => {
+                const select = document.getElementById(`category${key}`);
+                if (select) {
+                    productCategories[key] = select.value;
+                }
+            });
+            
             const productData = {
                 name: document.getElementById('productName').value,
                 productNumber: document.getElementById('productNumber').value || '',
@@ -585,17 +640,13 @@ async function handleSubmit(e) {
                 specs: document.getElementById('productSpecs').value,
                 specsList: specsList,
                 tableData: tableData,
-                categories: {
-                    watt: document.getElementById('categoryWatt').value,
-                    cct: document.getElementById('categoryCCT').value,
-                    ip: document.getElementById('categoryIP').value
-                },
+                categories: productCategories,
                 createdAt: firebase.database.ServerValue.TIMESTAMP
             };
             
             await database.ref('products').push(productData);
             
-            alert('✅ 제품이 추가되었습니다! (즉시 반영)');
+            alert('제품이 추가되었습니다!');
         }
         
         document.getElementById('productForm').reset();
@@ -611,7 +662,7 @@ async function handleSubmit(e) {
         
     } catch (error) {
         console.error('Error:', error);
-        alert('❌ 오류 발생: ' + error.message);
+        alert('오류 발생: ' + error.message);
     } finally {
         document.getElementById('loadingMessage').style.display = 'none';
     }
@@ -651,21 +702,24 @@ function loadProductList() {
     if (!productListEl) return;
     
     if (products.length > 0) {
-        productListEl.innerHTML = products.map((product, index) => `
-            <div class="product-item" style="display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #ddd;">
-                <img src="${product.thumbnail}" alt="${product.name}" 
-                     style="width: 80px; height: 80px; object-fit: cover; margin-right: 20px; border-radius: 5px;"
-                     onerror="this.src='img/placeholder.jpg';">
-                <div>
-                    <h4 style="margin: 0 0 5px 0;">${product.name}</h4>
-                    ${product.productNumber ? `<p style="margin: 0 0 5px 0; color: #999; font-size: 12px;">${product.productNumber}</p>` : ''}
-                    <p style="margin: 0; color: #666; font-size: 14px;">${product.specs ? product.specs.replace(/\n/g, ' / ') : ''}</p>
-                    <small style="color: #999;">
-                        ${product.categories ? `${product.categories.watt || ''} / ${product.categories.cct || ''} / ${product.categories.ip || ''}` : ''}
-                    </small>
+        productListEl.innerHTML = products.map((product, index) => {
+            const categoryText = product.categories ? 
+                Object.keys(categories).map(key => product.categories[key] || '').filter(v => v).join(' / ') : '';
+            
+            return `
+                <div class="product-item" style="display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #ddd;">
+                    <img src="${product.thumbnail}" alt="${product.name}" 
+                         style="width: 80px; height: 80px; object-fit: cover; margin-right: 20px; border-radius: 5px;"
+                         onerror="this.src='img/placeholder.jpg';">
+                    <div>
+                        <h4 style="margin: 0 0 5px 0;">${product.name}</h4>
+                        ${product.productNumber ? `<p style="margin: 0 0 5px 0; color: #999; font-size: 12px;">${product.productNumber}</p>` : ''}
+                        <p style="margin: 0; color: #666; font-size: 14px;">${product.specs ? product.specs.replace(/\n/g, ' / ') : ''}</p>
+                        <small style="color: #999;">${categoryText}</small>
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     } else {
         productListEl.innerHTML = '<p style="text-align: center; color: #999;">등록된 제품이 없습니다.</p>';
     }
