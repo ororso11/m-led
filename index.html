@@ -178,7 +178,6 @@
     <!-- Firebase 설정 파일 -->
     <script src="js/firebase-config.js"></script>
     
-    <!-- Firebase 초기화 및 데이터 로드 -->
     <script>
     // 전역 products 배열
     window.products = [];
@@ -201,7 +200,25 @@
             
             console.log('✅ Firebase 제품 데이터 로드:', products.length, '개');
             
-            // script.js의 createProductCards 함수 호출
+            // ✅ 1. 먼저 동적 필터 생성 (script.js가 로드된 경우)
+            if (typeof generateDynamicFilters === 'function') {
+                generateDynamicFilters();
+                console.log('✅ 동적 필터 생성 완료');
+            }
+            
+            // ✅ 2. 필터 리스너 설정
+            if (typeof setupDynamicFilterListeners === 'function') {
+                setupDynamicFilterListeners();
+            } else if (typeof setupFilterListeners === 'function') {
+                setupFilterListeners();
+            } else {
+                // 간단한 필터 설정
+                document.querySelectorAll('input[type="checkbox"][data-filter]').forEach(checkbox => {
+                    checkbox.addEventListener('change', applyFilters);
+                });
+            }
+            
+            // ✅ 3. 제품 카드 생성
             if (typeof createProductCards === 'function') {
                 createProductCards();
             } else {
@@ -226,17 +243,7 @@
                 `).join('');
             }
             
-            // 필터 설정
-            if (typeof setupFilterListeners === 'function') {
-                setupFilterListeners();
-            } else {
-                // 간단한 필터 설정
-                document.querySelectorAll('input[type="checkbox"][data-filter]').forEach(checkbox => {
-                    checkbox.addEventListener('change', applyFilters);
-                });
-            }
-            
-            // 검색 설정
+            // ✅ 4. 검색 설정
             if (typeof setupSearch === 'function') {
                 setupSearch();
             }
@@ -310,7 +317,7 @@
         }).join('');
     }
 
-    // Firebase 연결 상태 모니터링 (선택사항)
+    // Firebase 연결 상태 모니터링
     database.ref('.info/connected').on('value', function(snapshot) {
         if (snapshot.val() === true) {
             console.log('✅ Firebase 실시간 연결 활성화');
