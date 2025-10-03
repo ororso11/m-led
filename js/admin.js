@@ -635,3 +635,39 @@ function loadProductList() {
         productListEl.innerHTML = '<p style="text-align: center; color: #999;">등록된 제품이 없습니다.</p>';
     }
 }
+
+// 카테고리 추가
+window.addCategory = async function(type) {
+    // ID 매핑 (대소문자 정확히)
+    const inputIds = {
+        'watt': 'newWattCategory',
+        'cct': 'newCCTCategory',
+        'ip': 'newIPCategory'
+    };
+    
+    const input = document.getElementById(inputIds[type]);
+    
+    if (!input) {
+        console.error(`Input not found for type: ${type}, looking for ID: ${inputIds[type]}`);
+        alert('입력 필드를 찾을 수 없습니다.');
+        return;
+    }
+    
+    const value = input.value.trim();
+    
+    if (!value) {
+        alert('카테고리 값을 입력하세요.');
+        return;
+    }
+    
+    if (categories[type].includes(value)) {
+        alert('이미 존재하는 카테고리입니다.');
+        return;
+    }
+    
+    categories[type].push(value);
+    await saveSettings();
+    renderCategories();
+    input.value = '';
+    alert(`✅ "${value}" 카테고리가 추가되었습니다.`);
+}
