@@ -59,11 +59,18 @@ async function saveSettings() {
 
 // 카테고리 렌더링
 function renderCategories() {
+    // ID 매핑 (HTML의 실제 ID와 정확히 일치)
+    const typeToId = {
+        'watt': 'Watt',
+        'cct': 'CCT',
+        'ip': 'IP'
+    };
+    
     ['watt', 'cct', 'ip'].forEach(type => {
-        const capitalType = type.charAt(0).toUpperCase() + type.slice(1);
+        const idSuffix = typeToId[type];
         
         // 제품 등록용 select (드롭다운)
-        const select = document.getElementById(`category${capitalType}`);
+        const select = document.getElementById(`category${idSuffix}`);
         if (select) {
             select.innerHTML = '<option value="">선택하세요</option>' + 
                 categories[type].map(value => 
@@ -72,7 +79,7 @@ function renderCategories() {
         }
         
         // 삭제용 select (리스트)
-        const deleteSelect = document.getElementById(`category${capitalType}Delete`);
+        const deleteSelect = document.getElementById(`category${idSuffix}Delete`);
         if (deleteSelect) {
             deleteSelect.innerHTML = categories[type].map(value => 
                 `<option value="${value}">${value}</option>`
@@ -119,8 +126,22 @@ window.addCategory = async function(type) {
 
 // 카테고리 삭제
 window.deleteCategory = async function(type) {
-    const capitalType = type.charAt(0).toUpperCase() + type.slice(1);
-    const select = document.getElementById(`category${capitalType}Delete`);
+    // ID 매핑 (HTML의 실제 ID와 정확히 일치)
+    const typeToId = {
+        'watt': 'Watt',
+        'cct': 'CCT',
+        'ip': 'IP'
+    };
+    
+    const idSuffix = typeToId[type];
+    const select = document.getElementById(`category${idSuffix}Delete`);
+    
+    if (!select) {
+        console.error(`Select not found for type: ${type}, looking for ID: category${idSuffix}Delete`);
+        alert('삭제 목록을 찾을 수 없습니다.');
+        return;
+    }
+    
     const selectedValue = select.value;
     
     if (!selectedValue) {
