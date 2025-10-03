@@ -1,4 +1,4 @@
-// admin.js - Firebase 버전 (완전 동적 - 카테고리 타입도 동적)
+// admin.js - Firebase 버전 (완전 동적)
 
 // 전역 변수
 let products = [];
@@ -66,7 +66,7 @@ async function saveSettings() {
     }
 }
 
-// 카테고리 타입 렌더링
+// 카테고리 타입 렌더링 (기존 UI 스타일 유지)
 function renderCategoryTypes() {
     const container = document.getElementById('categoryTypesContainer');
     if (!container) return;
@@ -76,11 +76,11 @@ function renderCategoryTypes() {
     container.innerHTML = categoryKeys.map(key => {
         const cat = categories[key];
         return `
-            <div class="form-group" style="border: 1px solid #ddd; padding: 15px; border-radius: 8px; background: #f9f9f9;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <label style="margin: 0; font-weight: bold;">${cat.label} 카테고리 선택</label>
+            <div class="form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                    <label>${cat.label} 카테고리 선택</label>
                     <button type="button" onclick="deleteCategoryType('${key}')" 
-                            style="padding: 4px 12px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                            style="padding: 2px 8px; background: #f44336; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 11px;">
                         타입 삭제
                     </button>
                 </div>
