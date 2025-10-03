@@ -102,12 +102,21 @@ async function saveSettings() {
 // 카테고리 타입 렌더링 (기존 UI 스타일 유지)
 function renderCategoryTypes() {
     const container = document.getElementById('categoryTypesContainer');
-    if (!container) return;
+    if (!container) {
+        console.error('categoryTypesContainer 요소를 찾을 수 없습니다');
+        return;
+    }
     
     const categoryKeys = Object.keys(categories);
+    console.log('카테고리 타입 렌더링 중...', categoryKeys.length, '개 카테고리');
     
     container.innerHTML = categoryKeys.map(key => {
         const cat = categories[key];
+        if (!cat || !cat.values) {
+            console.error(`카테고리 ${key}의 구조가 잘못되었습니다:`, cat);
+            return '';
+        }
+        
         return `
             <div class="form-group">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
@@ -140,6 +149,8 @@ function renderCategoryTypes() {
             </div>
         `;
     }).join('');
+    
+    console.log('카테고리 타입 렌더링 완료');
 }
 
 // 카테고리 타입 추가 모달 열기
@@ -247,7 +258,12 @@ window.deleteCategoryValue = async function(key) {
 // 테이블 컬럼 렌더링
 function renderTableColumns() {
     const container = document.getElementById('tableDataContainer');
-    if (!container) return;
+    if (!container) {
+        console.error('tableDataContainer 요소를 찾을 수 없습니다');
+        return;
+    }
+    
+    console.log('테이블 컬럼 렌더링 중...', tableColumns.length, '개 항목');
     
     container.innerHTML = tableColumns.map(col => `
         <div class="form-group">
@@ -261,6 +277,8 @@ function renderTableColumns() {
             <input type="text" id="table${col.id}" placeholder="${col.placeholder}">
         </div>
     `).join('');
+    
+    console.log('테이블 컬럼 렌더링 완료');
 }
 
 // 테이블 컬럼 추가
