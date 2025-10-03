@@ -109,6 +109,24 @@ function renderCategoryTypes() {
     }).join('');
 }
 
+// 카테고리 타입 추가 모달 열기
+window.showAddCategoryTypeModal = function() {
+    const modal = document.getElementById('addCategoryTypeModal');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
+
+// 카테고리 타입 추가 모달 닫기
+window.closeAddCategoryTypeModal = function() {
+    const modal = document.getElementById('addCategoryTypeModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    document.getElementById('newCategoryTypeKey').value = '';
+    document.getElementById('newCategoryTypeLabel').value = '';
+}
+
 // 카테고리 타입 추가
 window.addCategoryType = async function() {
     const keyInput = document.getElementById('newCategoryTypeKey');
@@ -134,8 +152,7 @@ window.addCategoryType = async function() {
     
     await saveSettings();
     renderCategoryTypes();
-    keyInput.value = '';
-    labelInput.value = '';
+    closeAddCategoryTypeModal();
     alert(`"${label}" 카테고리 타입이 추가되었습니다.`);
 }
 

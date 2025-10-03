@@ -15,7 +15,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>🔧 제품 관리 시스템 
+        <h1>🔧 제품 관리 시스템 (Firebase 실시간 버전)
             <button onclick="logout()" style="float: right; padding: 8px 15px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 20px;">로그아웃</button>
         </h1>
         
@@ -88,58 +88,41 @@
                     <!-- admin.js의 renderTableColumns()가 여기에 필드를 생성함 -->
                 </div>
                 
-                <h3 style="margin: 30px 0 20px 0;">카테고리 설정</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin: 30px 0 20px 0;">
+                    <h3 style="margin: 0;">카테고리 설정</h3>
+                    <button type="button" onclick="showAddCategoryTypeModal()" 
+                            style="padding: 8px 15px; background: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                        + 카테고리 타입 추가
+                    </button>
+                </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
-                    <!-- WATT 카테고리 -->
-                    <div class="form-group">
-                        <label>WATT 카테고리 선택</label>
-                        <select id="categoryWatt" style="width: 100%; padding: 8px; margin-bottom: 10px;">
-                            <option value="">선택하세요</option>
-                        </select>
-                        
-                        <label style="margin-top: 15px; display: block; font-size: 13px; color: #666;">WATT 카테고리 관리</label>
-                        <div style="display: flex; gap: 5px; margin-bottom: 8px;">
-                            <input type="text" id="newWattCategory" placeholder="예: 35-40W" style="flex: 1; padding: 6px; font-size: 13px;">
-                            <button type="button" onclick="addCategory('watt')" style="padding: 6px 10px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">추가</button>
+                <!-- 동적 카테고리 컨테이너 -->
+                <div id="categoryTypesContainer" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+                    <!-- admin.js의 renderCategoryTypes()가 여기에 카테고리들을 생성함 -->
+                </div>
+
+                <!-- 카테고리 타입 추가 모달 -->
+                <div id="addCategoryTypeModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+                    <div style="background: white; padding: 30px; border-radius: 8px; max-width: 500px; width: 90%;">
+                        <h3 style="margin-top: 0;">새 카테고리 타입 추가</h3>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold;">카테고리 ID (영문소문자)</label>
+                            <input type="text" id="newCategoryTypeKey" placeholder="예: color" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
                         </div>
-                        <select id="categoryWattDelete" size="4" style="width: 100%; font-size: 12px; margin-bottom: 5px;">
-                        </select>
-                        <button type="button" onclick="deleteCategory('watt')" style="width: 100%; padding: 5px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">선택 항목 삭제</button>
-                    </div>
-                    
-                    <!-- CCT 카테고리 -->
-                    <div class="form-group">
-                        <label>CCT 카테고리 선택</label>
-                        <select id="categoryCCT" style="width: 100%; padding: 8px; margin-bottom: 10px;">
-                            <option value="">선택하세요</option>
-                        </select>
-                        
-                        <label style="margin-top: 15px; display: block; font-size: 13px; color: #666;">CCT 카테고리 관리</label>
-                        <div style="display: flex; gap: 5px; margin-bottom: 8px;">
-                            <input type="text" id="newCCTCategory" placeholder="예: 7000K" style="flex: 1; padding: 6px; font-size: 13px;">
-                            <button type="button" onclick="addCategory('cct')" style="padding: 6px 10px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">추가</button>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold;">카테고리 이름</label>
+                            <input type="text" id="newCategoryTypeLabel" placeholder="예: 색상" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
                         </div>
-                        <select id="categoryCCTDelete" size="4" style="width: 100%; font-size: 12px; margin-bottom: 5px;">
-                        </select>
-                        <button type="button" onclick="deleteCategory('cct')" style="width: 100%; padding: 5px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">선택 항목 삭제</button>
-                    </div>
-                    
-                    <!-- IP 카테고리 -->
-                    <div class="form-group">
-                        <label>IP 카테고리 선택</label>
-                        <select id="categoryIP" style="width: 100%; padding: 8px; margin-bottom: 10px;">
-                            <option value="">선택하세요</option>
-                        </select>
-                        
-                        <label style="margin-top: 15px; display: block; font-size: 13px; color: #666;">IP 카테고리 관리</label>
-                        <div style="display: flex; gap: 5px; margin-bottom: 8px;">
-                            <input type="text" id="newIPCategory" placeholder="예: IP69" style="flex: 1; padding: 6px; font-size: 13px;">
-                            <button type="button" onclick="addCategory('ip')" style="padding: 6px 10px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">추가</button>
+                        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                            <button type="button" onclick="closeAddCategoryTypeModal()" 
+                                    style="padding: 10px 20px; background: #999; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                취소
+                            </button>
+                            <button type="button" onclick="addCategoryType()" 
+                                    style="padding: 10px 20px; background: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                                추가
+                            </button>
                         </div>
-                        <select id="categoryIPDelete" size="4" style="width: 100%; font-size: 12px; margin-bottom: 5px;">
-                        </select>
-                        <button type="button" onclick="deleteCategory('ip')" style="width: 100%; padding: 5px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">선택 항목 삭제</button>
                     </div>
                 </div>
                 
@@ -191,11 +174,8 @@
     // Firebase Auth 체크
     firebase.auth().onAuthStateChanged((user) => {
         if (!user) {
-            // 로그인 안 됨
-            // alert('관리자 로그인이 필요합니다.');
             window.location.href = 'login.html';
         } else {
-            // 로그인됨 - 페이지 표시
             document.body.style.display = 'block';
             console.log('인증된 관리자:', user.email);
         }
