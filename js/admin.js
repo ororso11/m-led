@@ -1,10 +1,177 @@
-// admin.js - Firebase 버전
+// admin.js - Firebase 버전 (완전 동적)
 
 // 전역 변수
 let products = [];
 let specsList = [];
 let editingIndex = null;
 let editingKey = null;
+
+// 기본 카테고리 및 테이블 컬럼 설정
+let categories = {
+    watt: ['0-5W', '6-10W', '11-15W', '16-20W', '21-25W', '26-30W', '30W+'],
+    cct: ['2400K', '2700K', '3000K', '3500K', '4000K', '5700K', '6000K', '6500K', 'TW', 'RGB', 'RGBW'],
+    ip: ['IP20', 'IP44', 'IP54', 'IP65', 'IP66', 'IP67', 'IP68']
+};
+
+let tableColumns = [
+    { id: 'item', label: '품목', placeholder: 'LED 다운라이트' },
+    { id: 'voltage', label: '전압', placeholder: 'AC 220V' },
+    { id: 'current', label: '전류', placeholder: '0.05A' },
+    { id: 'maxOutput', label: '최대출력', placeholder: '10W' },
+    { id: 'efficiency', label: '효율', placeholder: '100lm/W' },
+    { id: 'dimension', label: '크기', placeholder: 'Ø90 x H50mm' },
+    { id: 'guarantee', label: '보증기간', placeholder: '2년' }
+];
+
+// Firebase에서 카테고리 및 테이블 설정 로드
+async function loadSettings() {
+    try {
+        const snapshot = await database.ref('settings').once('value');
+        const data = snapshot.val();
+        
+        if (data) {
+            if (data.categories) categories = data.categories;
+            if (data.tableColumns) tableColumns = data.tableColumns;
+        }
+        
+        renderCategories();
+        renderTableColumns();
+    } catch (error) {
+        console.error('설정 로드 실패:', error);
+        renderCategories();
+        renderTableColumns();
+    }
+}
+
+// Firebase에 설정 저장
+async function saveSettings() {
+    try {
+        await database.ref('settings').set({
+            categories,
+            tableColumns,
+            updatedAt: firebase.database.ServerValue.TIMESTAMP
+        });
+        console.log('✅ 설정 저장 완료');
+    } catch (error) {
+        console.error('설정 저장 실패:', error);
+    }
+}
+
+// 카테고리 렌더링
+function renderCategories() {
+    ['watt', 'cct', 'ip'].forEach(type => {
+        const select = document.getElementById(`category${type.charAt(0).toUpperCase() + type.slice(1)}`);
+        if (!select) return;
+        
+        select.innerHTML = categories[type].map(value => 
+            `<option value="${value}">${value}</option>`
+        ).join('');
+    });
+}
+
+// 카테고리 추가
+window.addCategory = async function(type) {
+    const input = document.getElementById(`new${type.charAt(0).toUpperCase() + type.slice(1)}Category`);
+    const value = input.value.trim();
+    
+    if (!value) {
+        alert('카테고리 값을 입력하세요.');
+        return;
+    }
+    
+    if (categories[type].includes(value)) {
+        alert('이미 존재하는 카테고리입니다.');
+        return;
+    }
+    
+    categories[type].push(value);
+    await saveSettings();
+    renderCategories();
+    input.value = '';
+    alert(`✅ "${value}" 카테고리가 추가되었습니다.`);
+}
+
+// 카테고리 삭제
+window.deleteCategory = async function(type) {
+    const select = document.getElementById(`category${type.charAt(0).toUpperCase() + type.slice(1)}`);
+    const selectedValue = select.value;
+    
+    if (!selectedValue) {
+        alert('삭제할 항목을 선택하세요.');
+        return;
+    }
+    
+    if (!confirm(`"${selectedValue}" 카테고리를 삭제하시겠습니까?`)) {
+        return;
+    }
+    
+    categories[type] = categories[type].filter(v => v !== selectedValue);
+    await saveSettings();
+    renderCategories();
+    alert(`✅ "${selectedValue}" 카테고리가 삭제되었습니다.`);
+}
+
+// 테이블 컬럼 렌더링
+function renderTableColumns() {
+    const container = document.getElementById('tableDataContainer');
+    if (!container) return;
+    
+    container.innerHTML = tableColumns.map(col => `
+        <div class="form-group">
+            <label for="table${col.id}">
+                ${col.label}
+                <button type="button" onclick="deleteTableColumn('${col.id}')" 
+                        style="margin-left: 10px; padding: 2px 8px; background: #f44336; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 11px;">
+                    삭제
+                </button>
+            </label>
+            <input type="text" id="table${col.id}" placeholder="${col.placeholder}">
+        </div>
+    `).join('');
+}
+
+// 테이블 컬럼 추가
+window.addTableColumn = async function() {
+    const input = document.getElementById('newTableColumn');
+    const label = input.value.trim();
+    
+    if (!label) {
+        alert('항목명을 입력하세요.');
+        return;
+    }
+    
+    const id = label.toLowerCase().replace(/[^a-z0-9]/g, '');
+    
+    if (tableColumns.find(col => col.id === id)) {
+        alert('이미 존재하는 항목입니다.');
+        return;
+    }
+    
+    tableColumns.push({
+        id: id,
+        label: label,
+        placeholder: ''
+    });
+    
+    await saveSettings();
+    renderTableColumns();
+    input.value = '';
+    alert(`✅ "${label}" 항목이 추가되었습니다.`);
+}
+
+// 테이블 컬럼 삭제
+window.deleteTableColumn = async function(id) {
+    const column = tableColumns.find(col => col.id === id);
+    
+    if (!confirm(`"${column.label}" 항목을 삭제하시겠습니까?`)) {
+        return;
+    }
+    
+    tableColumns = tableColumns.filter(col => col.id !== id);
+    await saveSettings();
+    renderTableColumns();
+    alert(`✅ "${column.label}" 항목이 삭제되었습니다.`);
+}
 
 // 페이지 로드 시 초기화
 document.addEventListener('DOMContentLoaded', function() {
@@ -15,6 +182,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const successMessage = document.getElementById('successMessage');
     if (successMessage) successMessage.style.display = 'none';
+    
+    // 설정 로드
+    loadSettings();
     
     // Firebase 연결 상태 모니터링
     if (typeof database !== 'undefined') {
@@ -104,11 +274,6 @@ async function uploadImageToFirebase(file, folder) {
         
     } catch (error) {
         console.error('❌ 업로드 실패:', error);
-        console.error('Error details:', {
-            code: error.code,
-            message: error.message,
-            serverResponse: error.serverResponse
-        });
         throw error;
     }
 }
@@ -126,13 +291,12 @@ window.editProduct = function(index) {
     document.getElementById('productSpecs').value = product.specs || '';
     
     if (product.tableData) {
-        document.getElementById('tableItem').value = product.tableData.item || '';
-        document.getElementById('tableVoltage').value = product.tableData.voltage || '';
-        document.getElementById('tableCurrent').value = product.tableData.current || '';
-        document.getElementById('tableMaxOutput').value = product.tableData.maxOutput || '';
-        document.getElementById('tableEfficiency').value = product.tableData.efficiency || '';
-        document.getElementById('tableDimension').value = product.tableData.dimension || '';
-        document.getElementById('tableGuarantee').value = product.tableData.guarantee || '';
+        tableColumns.forEach(col => {
+            const input = document.getElementById(`table${col.id}`);
+            if (input) {
+                input.value = product.tableData[col.id] || '';
+            }
+        });
     }
     
     if (product.categories) {
@@ -182,10 +346,7 @@ window.deleteProduct = async function(index) {
 function loadManagementList() {
     const manageListEl = document.getElementById('productManageList');
     
-    if (!manageListEl) {
-        console.error('productManageList element not found');
-        return;
-    }
+    if (!manageListEl) return;
     
     if (products.length > 0) {
         manageListEl.innerHTML = products.map((product, index) => `
@@ -267,7 +428,7 @@ function updateSpecsList() {
     specsListEl.innerHTML = specsList.map((spec, index) => `
         <li style="padding: 5px 0;">
             ${spec}
-            <button onclick="removeSpec(${index})" style="color: red; margin-left: 10px; cursor: pointer;">삭제</button>
+            <button onclick="removeSpec(${index})" style="color: red; margin-left: 10px; cursor: pointer; border: none; background: none;">삭제</button>
         </li>
     `).join('');
 }
@@ -317,6 +478,13 @@ async function handleSubmit(e) {
                 detailPaths = currentProduct.detailImages;
             }
             
+            // 테이블 데이터 동적 수집
+            const tableData = {};
+            tableColumns.forEach(col => {
+                const input = document.getElementById(`table${col.id}`);
+                tableData[col.id] = input ? (input.value || '-') : '-';
+            });
+            
             const updatedProduct = {
                 name: document.getElementById('productName').value,
                 productNumber: document.getElementById('productNumber').value || '',
@@ -324,15 +492,7 @@ async function handleSubmit(e) {
                 detailImages: detailPaths,
                 specs: document.getElementById('productSpecs').value,
                 specsList: specsList,
-                tableData: {
-                    item: document.getElementById('tableItem').value || document.getElementById('productName').value,
-                    voltage: document.getElementById('tableVoltage').value || '-',
-                    current: document.getElementById('tableCurrent').value || '-',
-                    maxOutput: document.getElementById('tableMaxOutput').value || '-',
-                    efficiency: document.getElementById('tableEfficiency').value || '-',
-                    dimension: document.getElementById('tableDimension').value || '-',
-                    guarantee: document.getElementById('tableGuarantee').value || '-'
-                },
+                tableData: tableData,
                 categories: {
                     watt: document.getElementById('categoryWatt').value,
                     cct: document.getElementById('categoryCCT').value,
@@ -362,6 +522,13 @@ async function handleSubmit(e) {
                 detailPaths.push(path);
             }
             
+            // 테이블 데이터 동적 수집
+            const tableData = {};
+            tableColumns.forEach(col => {
+                const input = document.getElementById(`table${col.id}`);
+                tableData[col.id] = input ? (input.value || '-') : '-';
+            });
+            
             const productData = {
                 name: document.getElementById('productName').value,
                 productNumber: document.getElementById('productNumber').value || '',
@@ -369,15 +536,7 @@ async function handleSubmit(e) {
                 detailImages: detailPaths,
                 specs: document.getElementById('productSpecs').value,
                 specsList: specsList,
-                tableData: {
-                    item: document.getElementById('tableItem').value || document.getElementById('productName').value,
-                    voltage: document.getElementById('tableVoltage').value || '-',
-                    current: document.getElementById('tableCurrent').value || '-',
-                    maxOutput: document.getElementById('tableMaxOutput').value || '-',
-                    efficiency: document.getElementById('tableEfficiency').value || '-',
-                    dimension: document.getElementById('tableDimension').value || '-',
-                    guarantee: document.getElementById('tableGuarantee').value || '-'
-                },
+                tableData: tableData,
                 categories: {
                     watt: document.getElementById('categoryWatt').value,
                     cct: document.getElementById('categoryCCT').value,
@@ -441,12 +600,7 @@ window.showTab = function(tabName) {
 function loadProductList() {
     const productListEl = document.getElementById('productList');
     
-    if (!productListEl) {
-        console.error('productList element not found');
-        return;
-    }
-    
-    console.log('Loading product list, products available:', products.length);
+    if (!productListEl) return;
     
     if (products.length > 0) {
         productListEl.innerHTML = products.map((product, index) => `

@@ -15,8 +15,10 @@
 </head>
 <body>
     <div class="container">
-        <h1>🔧 제품 관리 시스템 (Firebase 실시간 버전)</h1>
-        <button onclick="logout()" style="float: right; padding: 8px 15px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer;">로그아웃</button>
+        <h1>🔧 제품 관리 시스템 (Firebase 실시간 버전)
+            <button onclick="logout()" style="float: right; padding: 8px 15px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 20px;">로그아웃</button>
+        </h1>
+        
         <div id="syncStatus" class="sync-status disconnected">
             Firebase 연결 중...
         </div>
@@ -36,7 +38,6 @@
                     <input type="text" id="productName" required>
                 </div>
 
-                <!-- ✅ 이 부분 추가 -->
                 <div class="form-group">
                     <label for="productNumber">제품번호</label>
                     <input type="text" id="productNumber" placeholder="예: 28000673">
@@ -72,90 +73,61 @@
                 
                 <h3 style="margin: 30px 0 20px 0;">제품 테이블 데이터</h3>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div class="form-group">
-                        <label for="tableItem">품목</label>
-                        <input type="text" id="tableItem" placeholder="LED 다운라이트">
+                <!-- 테이블 항목 관리 섹션 -->
+                <div style="margin-bottom: 20px; padding: 15px; background: #f0f0f0; border-radius: 5px;">
+                    <label style="font-weight: bold; margin-bottom: 10px; display: block;">테이블 항목 관리 (추가/삭제)</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="newTableColumn" placeholder="새 항목명 (예: 색온도)" style="flex: 1; padding: 8px;">
+                        <button type="button" onclick="addTableColumn()" style="padding: 8px 15px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">항목 추가</button>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="tableVoltage">전압</label>
-                        <input type="text" id="tableVoltage" placeholder="AC 220V">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="tableCurrent">전류</label>
-                        <input type="text" id="tableCurrent" placeholder="0.05A">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="tableMaxOutput">최대출력</label>
-                        <input type="text" id="tableMaxOutput" placeholder="10W">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="tableEfficiency">효율</label>
-                        <input type="text" id="tableEfficiency" placeholder="100lm/W">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="tableDimension">크기</label>
-                        <input type="text" id="tableDimension" placeholder="Ø90 x H50mm">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="tableGuarantee">보증기간</label>
-                        <input type="text" id="tableGuarantee" placeholder="2년">
-                    </div>
+                    <p style="margin-top: 8px; font-size: 12px; color: #666;">* 추가된 항목은 아래에 자동으로 표시됩니다. 각 항목 옆의 삭제 버튼으로 제거할 수 있습니다.</p>
+                </div>
+                
+                <!-- 동적으로 생성되는 입력 필드들 -->
+                <div id="tableDataContainer" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <!-- admin.js의 renderTableColumns()가 여기에 필드를 생성함 -->
                 </div>
                 
                 <h3 style="margin: 30px 0 20px 0;">카테고리 설정</h3>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+                    <!-- WATT 카테고리 -->
                     <div class="form-group">
                         <label for="categoryWatt">WATT 카테고리</label>
-                        <select id="categoryWatt">
-                            <option value="">선택하세요</option>
-                            <option value="0-5W">0-5W</option>
-                            <option value="6-10W">6-10W</option>
-                            <option value="11-15W">11-15W</option>
-                            <option value="16-20W">16-20W</option>
-                            <option value="21-25W">21-25W</option>
-                            <option value="26-30W">26-30W</option>
-                            <option value="30W+">30W+</option>
+                        <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                            <input type="text" id="newWattCategory" placeholder="예: 35-40W" style="flex: 1; padding: 6px; font-size: 13px;">
+                            <button type="button" onclick="addCategory('watt')" style="padding: 6px 10px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">추가</button>
+                        </div>
+                        <select id="categoryWatt" size="6" style="width: 100%; font-size: 13px;">
+                            <!-- 동적으로 생성됨 -->
                         </select>
+                        <button type="button" onclick="deleteCategory('watt')" style="width: 100%; margin-top: 5px; padding: 5px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">선택 항목 삭제</button>
                     </div>
                     
+                    <!-- CCT 카테고리 -->
                     <div class="form-group">
                         <label for="categoryCCT">CCT 카테고리</label>
-                        <select id="categoryCCT">
-                            <option value="">선택하세요</option>
-                            <option value="2400K">2400K</option>
-                            <option value="2700K">2700K</option>
-                            <option value="3000K">3000K</option>
-                            <option value="3500K">3500K</option>
-                            <option value="4000K">4000K</option>
-                            <option value="5700K">5700K</option>
-                            <option value="6000K">6000K</option>
-                            <option value="6500K">6500K</option>
-                            <option value="TW">TW</option>
-                            <option value="RGB">RGB</option>
-                            <option value="RGBW">RGBW</option>
+                        <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                            <input type="text" id="newCCTCategory" placeholder="예: 7000K" style="flex: 1; padding: 6px; font-size: 13px;">
+                            <button type="button" onclick="addCategory('cct')" style="padding: 6px 10px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">추가</button>
+                        </div>
+                        <select id="categoryCCT" size="6" style="width: 100%; font-size: 13px;">
+                            <!-- 동적으로 생성됨 -->
                         </select>
+                        <button type="button" onclick="deleteCategory('cct')" style="width: 100%; margin-top: 5px; padding: 5px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">선택 항목 삭제</button>
                     </div>
                     
+                    <!-- IP 카테고리 -->
                     <div class="form-group">
                         <label for="categoryIP">IP 카테고리</label>
-                        <select id="categoryIP">
-                            <option value="">선택하세요</option>
-                            <option value="IP20">IP20</option>
-                            <option value="IP44">IP44</option>
-                            <option value="IP54">IP54</option>
-                            <option value="IP65">IP65</option>
-                            <option value="IP66">IP66</option>
-                            <option value="IP67">IP67</option>
-                            <option value="IP68">IP68</option>
+                        <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                            <input type="text" id="newIPCategory" placeholder="예: IP69" style="flex: 1; padding: 6px; font-size: 13px;">
+                            <button type="button" onclick="addCategory('ip')" style="padding: 6px 10px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">추가</button>
+                        </div>
+                        <select id="categoryIP" size="6" style="width: 100%; font-size: 13px;">
+                            <!-- 동적으로 생성됨 -->
                         </select>
+                        <button type="button" onclick="deleteCategory('ip')" style="width: 100%; margin-top: 5px; padding: 5px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">선택 항목 삭제</button>
                     </div>
                 </div>
                 
@@ -193,7 +165,6 @@
     <script src="js/firebase-config.js"></script>
     
     <script>
-
     function logout() {
         if (confirm('로그아웃 하시겠습니까?')) {
             firebase.auth().signOut().then(() => {
@@ -202,7 +173,6 @@
         }
     }
 
-
     // 페이지 전체 숨기기
     document.body.style.display = 'none';
     
@@ -210,7 +180,7 @@
     firebase.auth().onAuthStateChanged((user) => {
         if (!user) {
             // 로그인 안 됨
-            alert('관리자 로그인이 필요합니다.');
+            // alert('관리자 로그인이 필요합니다.');
             window.location.href = 'login.html';
         } else {
             // 로그인됨 - 페이지 표시
