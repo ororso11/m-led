@@ -39,7 +39,40 @@ async function loadSettings() {
         const data = snapshot.val();
         
         if (data) {
-            if (data.categories) categories = data.categories;
+            // 기존 데이터 마이그레이션 (배열 -> 객체 구조)
+            if (data.categories) {
+                const migratedCategories = {};
+                let needsMigration = false;
+                
+                Object.keys(data.categories).forEach(key => {
+                    // 이미 새 구조면 그대로 사용
+                    if (data.categories[key].label && data.categories[key].values) {
+                        migratedCategories[key] = data.categories[key];
+                    } 
+                    // 배열 구조면 객체로 변환
+                    else if (Array.isArray(data.categories[key])) {
+                        needsMigration = true;
+                        const labelMap = {
+                            'watt': 'WATT',
+                            'cct': 'CCT',
+                            'ip': 'IP등급'
+                        };
+                        migratedCategories[key] = {
+                            label: labelMap[key] || key.toUpperCase(),
+                            values: data.categories[key]
+                        };
+                    }
+                });
+                
+                categories = migratedCategories;
+                
+                // 마이그레이션이 필요했다면 저장
+                if (needsMigration) {
+                    console.log('카테고리 데이터 마이그레이션 중...');
+                    await saveSettings();
+                }
+            }
+            
             if (data.tableColumns) tableColumns = data.tableColumns;
         }
         
@@ -283,8 +316,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const successMessage = document.getElementById('successMessage');
     if (successMessage) successMessage.style.display = 'none';
     
-    // 설정 로드
-    loadSettings();
+    // 설정 로드 (약간의 지연을 두고 실행)
+    setTimeout(() => {
+        loadSettings();
+    }, 100);
     
     // Firebase 연결 상태 모니터링
     if (typeof database !== 'undefined') {
