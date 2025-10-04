@@ -187,7 +187,7 @@ nav a:hover {
     font-weight: bold;
 }
 
-/* Product Grid - PC 기본 5열 */
+/* Product Grid - 기본 5열 */
 .product-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -212,10 +212,10 @@ nav a:hover {
     transform: translateY(-2px);
 }
 
-/* 제품 이미지 영역 */
+/* 제품 이미지 영역 - 꽉 차게 */
 .product-image {
     width: 100%;
-    height: 240px;
+    height: 280px;
     background: #f8f8f8;
     display: flex;
     align-items: center;
@@ -227,8 +227,8 @@ nav a:hover {
 .product-image img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    padding: 20px;
+    object-fit: cover;
+    padding: 0;
 }
 
 /* 제품 정보 영역 */
@@ -277,6 +277,7 @@ nav a:hover {
     cursor: pointer;
     transition: all 0.2s;
     font-weight: 500;
+    border: none;
 }
 
 .category-btn:hover {
@@ -397,11 +398,17 @@ nav a:hover {
     border-bottom: none;
 }
 
+.detail-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    margin: 30px 0;
+}
+
 .detail-table {
     width: 100%;
     border-collapse: collapse;
-    margin: 30px 0;
     background: #fff;
+    min-width: 600px;
 }
 
 .detail-table th,
@@ -474,278 +481,6 @@ nav a:hover {
 .detail-additional-images img {
     width: 100%;
     border-radius: 8px;
-}
-
-/* 프로젝트 페이지 */
-.project-page-title {
-    font-size: 48px;
-    text-align: center;
-    margin: 60px 0 40px;
-    font-weight: bold;
-}
-
-.category-tabs {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-bottom: 50px;
-    flex-wrap: wrap;
-    padding: 0 20px;
-}
-
-.category-tab {
-    padding: 12px 25px;
-    background: none;
-    border: none;
-    font-size: 16px;
-    color: #666;
-    cursor: pointer;
-    transition: all 0.3s;
-    position: relative;
-}
-
-.category-tab:hover {
-    color: #000;
-}
-
-.category-tab.active {
-    color: #000;
-    font-weight: bold;
-}
-
-.category-tab.active::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: #000;
-}
-
-.projects-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 30px;
-    padding: 0 40px;
-    margin-bottom: 80px;
-}
-
-.project-card {
-    cursor: pointer;
-    transition: transform 0.3s;
-    overflow: hidden;
-}
-
-.project-card:hover {
-    transform: scale(1.02);
-}
-
-.project-card .project-image {
-    width: 100%;
-    height: 280px;
-    overflow: hidden;
-    background: #f0f0f0;
-    position: relative;
-}
-
-.project-card .project-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s;
-}
-
-.project-card:hover .project-image img {
-    transform: scale(1.05);
-}
-
-.project-info {
-    padding: 20px 0;
-    text-align: center;
-}
-
-.project-title {
-    font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 8px;
-    color: #000;
-}
-
-.project-category {
-    font-size: 13px;
-    color: #666;
-}
-
-/* 문의 페이지 */
-.inquiry-page-title {
-    font-size: 48px;
-    text-align: center;
-    margin: 60px 0 20px;
-    font-weight: bold;
-}
-
-.inquiry-subtitle {
-    text-align: center;
-    color: #666;
-    margin-bottom: 50px;
-    line-height: 1.8;
-}
-
-.inquiry-form {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-.form-group {
-    margin-bottom: 30px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 10px;
-    font-weight: bold;
-    color: #333;
-    font-size: 15px;
-}
-
-.form-group label .required {
-    color: #ff0000;
-    margin-left: 3px;
-}
-
-.form-group input,
-.form-group textarea {
-    width: 100%;
-    padding: 15px;
-    border: 1px solid #ddd;
-    font-size: 15px;
-    transition: border-color 0.3s;
-}
-
-.form-group input:focus,
-.form-group textarea:focus {
-    outline: none;
-    border-color: #000;
-}
-
-.form-group textarea {
-    min-height: 250px;
-    resize: vertical;
-}
-
-.file-upload-area {
-    border: 2px dashed #ddd;
-    padding: 30px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s;
-    background: #fafafa;
-}
-
-.file-upload-area:hover {
-    border-color: #000;
-    background: #f0f0f0;
-}
-
-.file-upload-area input {
-    display: none;
-}
-
-.file-list {
-    margin-top: 15px;
-    padding: 15px;
-    background: #f9f9f9;
-    border-radius: 5px;
-}
-
-.file-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    background: white;
-    margin-bottom: 8px;
-    border-radius: 3px;
-}
-
-.file-item button {
-    background: #f44336;
-    color: white;
-    border: none;
-    padding: 5px 12px;
-    border-radius: 3px;
-    cursor: pointer;
-    font-size: 13px;
-}
-
-.submit-btn {
-    width: 100%;
-    padding: 18px;
-    background: #000;
-    color: white;
-    border: none;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 30px;
-    margin-bottom: 100px;
-    transition: background 0.3s;
-}
-
-.submit-btn:hover {
-    background: #333;
-}
-
-.submit-btn:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-}
-
-.success-message {
-    display: none;
-    background: #4CAF50;
-    color: white;
-    padding: 20px;
-    text-align: center;
-    border-radius: 5px;
-    margin: 20px 0;
-    font-size: 16px;
-}
-
-.error-message {
-    display: none;
-    background: #f44336;
-    color: white;
-    padding: 20px;
-    text-align: center;
-    border-radius: 5px;
-    margin: 20px 0;
-    font-size: 16px;
-}
-
-.scroll-to-top {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    width: 50px;
-    height: 50px;
-    background: #000;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 20px;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-    z-index: 1000;
-}
-
-.scroll-to-top.show {
-    display: flex;
 }
 
 /* Overlay for mobile menu */
@@ -864,32 +599,26 @@ footer {
 /* 대형 PC (1400px 이상) - 5열 */
 @media (min-width: 1400px) {
     .product-grid {
-        grid-template-columns: repeat(5, 1fr);
+        grid-template-columns: repeat(5, 1fr) !important;
     }
 }
 
 /* 일반 PC (1025px ~ 1399px) - 4열 */
 @media (min-width: 1025px) and (max-width: 1399px) {
     .product-grid {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(4, 1fr) !important;
     }
 }
 
 /* Tablet (769px ~ 1024px) - 3열 */
 @media (min-width: 769px) and (max-width: 1024px) {
     .product-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(3, 1fr) !important;
         gap: 16px;
     }
     
     .product-image {
-        height: 200px;
-    }
-    
-    .projects-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
-        padding: 0 20px;
+        height: 240px;
     }
 }
 
@@ -975,7 +704,8 @@ footer {
     }
 
     .main-content {
-        padding: 20px 15px;
+        padding: 20px 10px;
+        width: 100%;
     }
 
     .page-title {
@@ -983,26 +713,60 @@ footer {
         margin-bottom: 20px;
     }
 
-    /* 모바일도 2열 유지 */
+    /* 모바일 2열 강제 적용 + 이미지 크기 증가 */
     .product-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+        padding: 10px 0 !important;
+    }
+    
+    .product-card {
+        width: 100%;
     }
     
     .product-image {
-        height: 180px;
+        height: 200px;
+    }
+    
+    .product-image img {
+        padding: 0;
     }
     
     .product-info {
-        padding: 15px;
+        padding: 12px;
     }
     
     .product-name {
-        font-size: 14px;
+        font-size: 13px !important;
+        line-height: 1.3;
+        margin-bottom: 6px;
     }
     
     .product-specs {
-        font-size: 12px;
+        font-size: 11px !important;
+        line-height: 1.5;
+    }
+    
+    .category-buttons {
+        gap: 4px;
+        margin-top: 8px;
+    }
+    
+    .category-btn {
+        padding: 3px 6px !important;
+        font-size: 10px !important;
+    }
+    
+    /* 대분류 버튼 모바일 최적화 */
+    #productTypeFilters {
+        gap: 8px !important;
+        padding: 0 10px;
+        margin-bottom: 20px !important;
+    }
+    
+    #productTypeFilters button {
+        padding: 8px 15px !important;
+        font-size: 12px !important;
     }
 
     .detail-header {
@@ -1052,18 +816,15 @@ footer {
         word-break: keep-all;
     }
 
-    .detail-table {
+    .detail-table-wrapper {
         width: 100%;
-        display: block;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
         margin: 20px 0;
     }
 
-    .detail-table table {
-        width: 100%;
+    .detail-table {
         min-width: 600px;
-        border-collapse: collapse;
     }
 
     .detail-table th,
@@ -1071,14 +832,9 @@ footer {
         padding: 10px 8px;
         font-size: 11px;
         white-space: nowrap;
-        text-align: center;
-        border: 1px solid #ddd;
     }
 
     .detail-table th {
-        background: #333;
-        color: #fff;
-        font-weight: normal;
         font-size: 10px;
     }
 
@@ -1112,82 +868,10 @@ footer {
         grid-template-columns: 1fr;
     }
 
-    .project-page-title {
-        font-size: 32px;
-        margin: 40px 0 30px;
-    }
-
-    .category-tabs {
-        gap: 10px;
-    }
-
-    .category-tab {
-        padding: 10px 15px;
-        font-size: 14px;
-    }
-
-    .projects-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
-        padding: 0 15px;
-    }
-
-    .project-card .project-image {
-        height: 180px;
-    }
-
-    .project-title {
-        font-size: 16px;
-    }
-
-    .inquiry-page-title {
-        font-size: 32px;
-        margin: 40px 0 15px;
-    }
-
-    .inquiry-subtitle {
-        font-size: 14px;
-        padding: 0 15px;
-    }
-
-    .inquiry-form {
-        padding: 0 15px;
-    }
-
-    .form-group {
-        margin-bottom: 20px;
-    }
-
-    .form-group label {
-        font-size: 14px;
-    }
-
-    .form-group input,
-    .form-group textarea {
-        padding: 12px;
-        font-size: 14px;
-    }
-
-    .file-upload-area {
-        padding: 20px;
-    }
-
-    .submit-btn {
-        padding: 15px;
-        font-size: 15px;
-    }
-
-    .scroll-to-top {
-        width: 45px;
-        height: 45px;
-        bottom: 20px;
-        right: 20px;
-    }
-
     .pagination-container {
         margin-top: 30px;
         margin-bottom: 20px;
-        padding: 0 15px;
+        padding: 0 10px;
     }
     
     .pagination {
@@ -1195,9 +879,9 @@ footer {
     }
     
     .page-btn {
-        padding: 8px 12px;
-        font-size: 13px;
-        min-width: 35px;
+        padding: 8px 10px;
+        font-size: 12px;
+        min-width: 32px;
     }
     
     .page-dots {
@@ -1221,18 +905,32 @@ footer {
     }
 }
 
-/* Small Mobile (480px 이하) - 2열 유지 */
+/* Small Mobile (480px 이하) - 2열 유지 + 이미지 크기 증가 */
 @media (max-width: 480px) {
     .product-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
     }
     
     .product-image {
-        height: 160px;
+        height: 180px;
     }
-
-    .projects-grid {
-        grid-template-columns: 1fr;
+    
+    .product-image img {
+        padding: 0;
+    }
+    
+    .product-name {
+        font-size: 12px !important;
+    }
+    
+    .product-specs {
+        font-size: 10px !important;
+    }
+    
+    #productTypeFilters button {
+        padding: 6px 10px !important;
+        font-size: 11px !important;
     }
 
     .detail-main-image img {
