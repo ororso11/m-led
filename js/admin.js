@@ -1,4 +1,4 @@
-// admin.js - Firebase 버전 (완전 동적)
+// admin.js - Firebase 버전 (완전 동적 + 유효성 검증)
 
 // 전역 변수
 let products = [];
@@ -8,6 +8,10 @@ let editingKey = null;
 
 // 기본 카테고리 및 테이블 컬럼 설정
 let categories = {
+    productType: {
+        label: '대분류',
+        values: ['ALL', '원형매입', '사각매입', '레일', '마그네틱']
+    },
     watt: {
         label: 'WATT',
         values: ['0-5W', '6-10W', '11-15W', '16-20W', '21-25W', '26-30W', '30W+']
@@ -39,20 +43,17 @@ async function loadSettings() {
         const data = snapshot.val();
         
         if (data) {
-            // 기존 데이터 마이그레이션 (배열 -> 객체 구조)
             if (data.categories) {
                 const migratedCategories = {};
                 let needsMigration = false;
                 
                 Object.keys(data.categories).forEach(key => {
-                    // 이미 새 구조면 그대로 사용
                     if (data.categories[key].label && data.categories[key].values) {
                         migratedCategories[key] = data.categories[key];
-                    } 
-                    // 배열 구조면 객체로 변환
-                    else if (Array.isArray(data.categories[key])) {
+                    } else if (Array.isArray(data.categories[key])) {
                         needsMigration = true;
                         const labelMap = {
+                            'productType': '대분류',
                             'watt': 'WATT',
                             'cct': 'CCT',
                             'ip': 'IP등급'
@@ -66,7 +67,6 @@ async function loadSettings() {
                 
                 categories = migratedCategories;
                 
-                // 마이그레이션이 필요했다면 저장
                 if (needsMigration) {
                     console.log('카테고리 데이터 마이그레이션 중...');
                     await saveSettings();
@@ -76,10 +76,27 @@ async function loadSettings() {
             if (data.tableColumns) tableColumns = data.tableColumns;
         }
         
+        if (!categories.productType) {
+            console.log('대분류 카테고리 기본값 생성');
+            categories.productType = {
+                label: '대분류',
+                values: ['ALL', '원형매입', '사각매입', '레일', '마그네틱']
+            };
+            await saveSettings();
+        }
+        
         renderCategoryTypes();
         renderTableColumns();
     } catch (error) {
         console.error('설정 로드 실패:', error);
+        
+        if (!categories.productType) {
+            categories.productType = {
+                label: '대분류',
+                values: ['ALL', '원형매입', '사각매입', '레일', '마그네틱']
+            };
+        }
+        
         renderCategoryTypes();
         renderTableColumns();
     }
@@ -99,23 +116,52 @@ async function saveSettings() {
     }
 }
 
-// 카테고리 타입 렌더링 (기존 UI 스타일 유지)
+// 카테고리 타입 렌더링
 function renderCategoryTypes() {
-    const container = document.getElementById('categoryTypesContainer');
-    if (!container) {
-        console.error('categoryTypesContainer 요소를 찾을 수 없습니다');
-        return;
+    const mainContainer = document.getElementById('mainCategoryContainer');
+    if (mainContainer) {
+        if (categories.productType) {
+            const cat = categories.productType;
+            mainContainer.innerHTML = `
+                <div class="form-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                        <label>${cat.label} 카테고리 선택 <span style="color: red;">*</span></label>
+                    </div>
+                    <select id="categoryproductType" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+                        <option value="">선택하세요</option>
+                        ${cat.values.map(value => `<option value="${value}">${value}</option>`).join('')}
+                    </select>
+                    
+                    <label style="margin-top: 15px; display: block; font-size: 13px; color: #666;">${cat.label} 카테고리 관리</label>
+                    <div style="display: flex; gap: 5px; margin-bottom: 8px;">
+                        <input type="text" id="newproductTypeCategory" placeholder="예: 벽등" style="flex: 1; padding: 6px; font-size: 13px;">
+                        <button type="button" onclick="addCategoryValue('productType')" 
+                                style="padding: 6px 10px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                            추가
+                        </button>
+                    </div>
+                    <select id="categoryproductTypeDelete" size="4" style="width: 100%; font-size: 12px; margin-bottom: 5px;">
+                        ${cat.values.map(value => `<option value="${value}">${value}</option>`).join('')}
+                    </select>
+                    <button type="button" onclick="deleteCategoryValue('productType')" 
+                            style="width: 100%; padding: 5px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                        선택 항목 삭제
+                    </button>
+                </div>
+            `;
+        } else {
+            mainContainer.innerHTML = '<p style="color: #999;">대분류 카테고리 로딩 중...</p>';
+        }
     }
     
-    const categoryKeys = Object.keys(categories);
-    console.log('카테고리 타입 렌더링 중...', categoryKeys.length, '개 카테고리');
+    const container = document.getElementById('categoryTypesContainer');
+    if (!container) return;
+    
+    const categoryKeys = Object.keys(categories).filter(key => key !== 'productType');
     
     container.innerHTML = categoryKeys.map(key => {
         const cat = categories[key];
-        if (!cat || !cat.values) {
-            console.error(`카테고리 ${key}의 구조가 잘못되었습니다:`, cat);
-            return '';
-        }
+        if (!cat || !cat.values) return '';
         
         return `
             <div class="form-group">
@@ -149,29 +195,20 @@ function renderCategoryTypes() {
             </div>
         `;
     }).join('');
-    
-    console.log('카테고리 타입 렌더링 완료');
 }
 
-// 카테고리 타입 추가 모달 열기
 window.showAddCategoryTypeModal = function() {
     const modal = document.getElementById('addCategoryTypeModal');
-    if (modal) {
-        modal.style.display = 'flex';
-    }
+    if (modal) modal.style.display = 'flex';
 }
 
-// 카테고리 타입 추가 모달 닫기
 window.closeAddCategoryTypeModal = function() {
     const modal = document.getElementById('addCategoryTypeModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
+    if (modal) modal.style.display = 'none';
     document.getElementById('newCategoryTypeKey').value = '';
     document.getElementById('newCategoryTypeLabel').value = '';
 }
 
-// 카테고리 타입 추가
 window.addCategoryType = async function() {
     const keyInput = document.getElementById('newCategoryTypeKey');
     const labelInput = document.getElementById('newCategoryTypeLabel');
@@ -181,6 +218,11 @@ window.addCategoryType = async function() {
     
     if (!key || !label) {
         alert('카테고리 ID와 이름을 모두 입력하세요.');
+        return;
+    }
+    
+    if (key === 'producttype' || key === 'productType') {
+        alert('productType은 대분류 카테고리로 예약되어 있습니다. 다른 ID를 사용하세요.');
         return;
     }
     
@@ -200,8 +242,12 @@ window.addCategoryType = async function() {
     alert(`"${label}" 카테고리 타입이 추가되었습니다.`);
 }
 
-// 카테고리 타입 삭제
 window.deleteCategoryType = async function(key) {
+    if (key === 'productType') {
+        alert('대분류 카테고리는 삭제할 수 없습니다.');
+        return;
+    }
+    
     const cat = categories[key];
     
     if (!confirm(`"${cat.label}" 카테고리 타입을 완전히 삭제하시겠습니까?\n(모든 하위 값도 함께 삭제됩니다)`)) {
@@ -214,13 +260,18 @@ window.deleteCategoryType = async function(key) {
     alert(`"${cat.label}" 카테고리 타입이 삭제되었습니다.`);
 }
 
-// 카테고리 값 추가
 window.addCategoryValue = async function(key) {
     const input = document.getElementById(`new${key}Category`);
     const value = input.value.trim();
     
     if (!value) {
         alert('카테고리 값을 입력하세요.');
+        return;
+    }
+    
+    // 공백만 있는지 검증
+    if (value.length === 0 || !value.replace(/\s/g, '')) {
+        alert('공백만으로는 카테고리를 추가할 수 없습니다.');
         return;
     }
     
@@ -232,10 +283,10 @@ window.addCategoryValue = async function(key) {
     categories[key].values.push(value);
     await saveSettings();
     renderCategoryTypes();
+    input.value = '';
     alert(`"${value}" 카테고리가 추가되었습니다.`);
 }
 
-// 카테고리 값 삭제
 window.deleteCategoryValue = async function(key) {
     const select = document.getElementById(`category${key}Delete`);
     const selectedValue = select.value;
@@ -255,15 +306,9 @@ window.deleteCategoryValue = async function(key) {
     alert(`"${selectedValue}" 카테고리가 삭제되었습니다.`);
 }
 
-// 테이블 컬럼 렌더링
 function renderTableColumns() {
     const container = document.getElementById('tableDataContainer');
-    if (!container) {
-        console.error('tableDataContainer 요소를 찾을 수 없습니다');
-        return;
-    }
-    
-    console.log('테이블 컬럼 렌더링 중...', tableColumns.length, '개 항목');
+    if (!container) return;
     
     container.innerHTML = tableColumns.map(col => `
         <div class="form-group">
@@ -277,11 +322,8 @@ function renderTableColumns() {
             <input type="text" id="table${col.id}" placeholder="${col.placeholder}">
         </div>
     `).join('');
-    
-    console.log('테이블 컬럼 렌더링 완료');
 }
 
-// 테이블 컬럼 추가
 window.addTableColumn = async function() {
     const input = document.getElementById('newTableColumn');
     const label = input.value.trim();
@@ -291,7 +333,17 @@ window.addTableColumn = async function() {
         return;
     }
     
-    const id = label.toLowerCase().replace(/[^a-z0-9]/g, '');
+    let id = label.toLowerCase()
+        .replace(/\s+/g, '')
+        .replace(/[^a-z0-9가-힣]/g, '');
+    
+    if (!id || /^\d+$/.test(id)) {
+        id = 'field' + Date.now();
+    }
+    
+    if (/[가-힣]/.test(id)) {
+        id = 'field' + Date.now();
+    }
     
     if (tableColumns.find(col => col.id === id)) {
         alert('이미 존재하는 항목입니다.');
@@ -310,7 +362,6 @@ window.addTableColumn = async function() {
     alert(`"${label}" 항목이 추가되었습니다.`);
 }
 
-// 테이블 컬럼 삭제
 window.deleteTableColumn = async function(id) {
     const column = tableColumns.find(col => col.id === id);
     
@@ -334,12 +385,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const successMessage = document.getElementById('successMessage');
     if (successMessage) successMessage.style.display = 'none';
     
-    // 설정 로드 (약간의 지연을 두고 실행)
     setTimeout(() => {
         loadSettings();
     }, 100);
     
-    // Firebase 연결 상태 모니터링
     if (typeof database !== 'undefined') {
         database.ref('.info/connected').on('value', function(snapshot) {
             const syncStatus = document.getElementById('syncStatus');
@@ -354,7 +403,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // Firebase에서 실시간 제품 데이터 가져오기
         database.ref('products').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
@@ -404,7 +452,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Firebase Storage에 이미지 업로드
 async function uploadImageToFirebase(file, folder) {
     try {
         if (!storage) {
@@ -431,7 +478,6 @@ async function uploadImageToFirebase(file, folder) {
     }
 }
 
-// 제품 수정
 window.editProduct = function(index) {
     if (!products || !products[index]) return;
     
@@ -475,7 +521,6 @@ window.editProduct = function(index) {
     alert('제품 정보를 수정한 후 "제품 수정 완료" 버튼을 클릭하세요.\n(이미지를 변경하지 않으려면 파일을 선택하지 마세요)');
 }
 
-// 제품 삭제
 window.deleteProduct = async function(index) {
     if (!confirm('정말로 이 제품을 삭제하시겠습니까?')) return;
     
@@ -498,7 +543,6 @@ window.deleteProduct = async function(index) {
     }
 }
 
-// 관리 리스트 로드
 function loadManagementList() {
     const manageListEl = document.getElementById('productManageList');
     
@@ -538,7 +582,6 @@ function loadManagementList() {
     }
 }
 
-// 썸네일 업로드 미리보기
 window.handleThumbnailUpload = function(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -551,7 +594,6 @@ window.handleThumbnailUpload = function(event) {
     reader.readAsDataURL(file);
 }
 
-// 상세 이미지 업로드 미리보기
 window.handleDetailImagesUpload = function(event) {
     const files = Array.from(event.target.files);
     if (!files.length) return;
@@ -569,7 +611,6 @@ window.handleDetailImagesUpload = function(event) {
     });
 }
 
-// 스펙 추가
 window.addSpec = function() {
     const specInput = document.getElementById('specInput');
     const spec = specInput.value.trim();
@@ -581,7 +622,6 @@ window.addSpec = function() {
     }
 }
 
-// 스펙 리스트 업데이트
 function updateSpecsList() {
     const specsListEl = document.getElementById('specsList');
     specsListEl.innerHTML = specsList.map((spec, index) => `
@@ -592,25 +632,57 @@ function updateSpecsList() {
     `).join('');
 }
 
-// 스펙 삭제
 window.removeSpec = function(index) {
     specsList.splice(index, 1);
     updateSpecsList();
 }
 
-// 폼 제출 처리
+// ====== 유효성 검증 함수 추가 ======
+function validateProductForm() {
+    const errors = [];
+    
+    // 제품명 검증
+    const productName = document.getElementById('productName').value.trim();
+    if (!productName) {
+        errors.push('제품명을 입력하세요.');
+    }
+    
+    // 대분류 필수 선택 검증
+    const productType = document.getElementById('categoryproductType').value;
+    if (!productType) {
+        errors.push('대분류를 선택하세요.');
+    }
+    
+    // 이미지 검증 (신규 등록 시에만)
+    if (editingIndex === null) {
+        const thumbnailInput = document.getElementById('thumbnailInput');
+        const detailImagesInput = document.getElementById('detailImagesInput');
+        
+        if (!thumbnailInput.files.length) {
+            errors.push('썸네일 이미지를 업로드하세요.');
+        }
+        
+        if (!detailImagesInput.files.length) {
+            errors.push('상세 이미지를 업로드하세요.');
+        }
+    }
+    
+    return errors;
+}
+
+// 폼 제출 처리 (유효성 검증 포함)
 async function handleSubmit(e) {
     e.preventDefault();
     
+    // 유효성 검증
+    const errors = validateProductForm();
+    if (errors.length > 0) {
+        alert('다음 항목을 확인하세요:\n\n' + errors.map((err, i) => `${i + 1}. ${err}`).join('\n'));
+        return;
+    }
+    
     const thumbnailInput = document.getElementById('thumbnailInput');
     const detailImagesInput = document.getElementById('detailImagesInput');
-    
-    if (editingIndex === null) {
-        if (!thumbnailInput.files.length || !detailImagesInput.files.length) {
-            alert('썸네일과 상세 이미지를 모두 업로드해주세요.');
-            return;
-        }
-    }
     
     document.getElementById('loadingMessage').style.display = 'block';
     
@@ -637,14 +709,12 @@ async function handleSubmit(e) {
                 detailPaths = currentProduct.detailImages;
             }
             
-            // 테이블 데이터 동적 수집
             const tableData = {};
             tableColumns.forEach(col => {
                 const input = document.getElementById(`table${col.id}`);
                 tableData[col.id] = input ? (input.value || '-') : '-';
             });
             
-            // 카테고리 동적 수집
             const productCategories = {};
             Object.keys(categories).forEach(key => {
                 const select = document.getElementById(`category${key}`);
@@ -686,14 +756,12 @@ async function handleSubmit(e) {
                 detailPaths.push(path);
             }
             
-            // 테이블 데이터 동적 수집
             const tableData = {};
             tableColumns.forEach(col => {
                 const input = document.getElementById(`table${col.id}`);
                 tableData[col.id] = input ? (input.value || '-') : '-';
             });
             
-            // 카테고리 동적 수집
             const productCategories = {};
             Object.keys(categories).forEach(key => {
                 const select = document.getElementById(`category${key}`);
@@ -738,7 +806,6 @@ async function handleSubmit(e) {
     }
 }
 
-// 탭 전환 함수
 window.showTab = function(tabName) {
     document.querySelectorAll('.tab-content').forEach(content => {
         content.classList.remove('active');
@@ -765,7 +832,6 @@ window.showTab = function(tabName) {
     }
 }
 
-// 제품 목록 로드
 function loadProductList() {
     const productListEl = document.getElementById('productList');
     

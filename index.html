@@ -14,18 +14,16 @@
     <!-- 리스트 페이지 -->
     <div id="listPage">
         <div style="background: linear-gradient(to right, #1a1a1a 0%, #2c2c2c 100%);">
-            <!-- 웹용 헤더 (768px 이상에서만 표시) -->
+            <!-- 웹용 헤더 -->
             <div class="header-wrapper">
                 <header>
                     <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
                     <div class="logo">INTECH LIGHTING</div>
                     <nav>
                         <a href="index.html">카탈로그</a>
-                        <!-- <a href="project.html">프로젝트</a> -->
-                        <!-- <a href="inquiry.html">문의</a> -->
                     </nav>
                     <div class="search-box">
-                        <input type="text" placeholder="search">
+                        <input type="text" id="searchInput" placeholder="search">
                         <span>🔍</span>
                     </div>
                 </header>
@@ -39,47 +37,9 @@
             <aside class="sidebar" id="sidebar">
                 <h3>제품</h3>
                 
-                <div class="filter-group">
-                    <h4 onclick="toggleFilterGroup(this)">WATT</h4>
-                    <div class="filter-group-content">
-                        <label><input type="checkbox" data-filter="watt" value="0-5W"> 0-5W</label>
-                        <label><input type="checkbox" data-filter="watt" value="6-10W"> 6-10W</label>
-                        <label><input type="checkbox" data-filter="watt" value="11-15W"> 11-15W</label>
-                        <label><input type="checkbox" data-filter="watt" value="16-20W"> 16-20W</label>
-                        <label><input type="checkbox" data-filter="watt" value="21-25W"> 21-25W</label>
-                        <label><input type="checkbox" data-filter="watt" value="26-30W"> 26-30W</label>
-                        <label><input type="checkbox" data-filter="watt" value="30W+"> 30W+</label>
-                    </div>
-                </div>
-
-                <div class="filter-group">
-                    <h4 onclick="toggleFilterGroup(this)">CCT</h4>
-                    <div class="filter-group-content">
-                        <label><input type="checkbox" data-filter="cct" value="2400K"> 2400K</label>
-                        <label><input type="checkbox" data-filter="cct" value="2700K"> 2700K</label>
-                        <label><input type="checkbox" data-filter="cct" value="3000K"> 3000K</label>
-                        <label><input type="checkbox" data-filter="cct" value="3500K"> 3500K</label>
-                        <label><input type="checkbox" data-filter="cct" value="4000K"> 4000K</label>
-                        <label><input type="checkbox" data-filter="cct" value="5700K"> 5700K</label>
-                        <label><input type="checkbox" data-filter="cct" value="6000K"> 6000K</label>
-                        <label><input type="checkbox" data-filter="cct" value="6500K"> 6500K</label>
-                        <label><input type="checkbox" data-filter="cct" value="TW"> TW</label>
-                        <label><input type="checkbox" data-filter="cct" value="RGB"> RGB</label>
-                        <label><input type="checkbox" data-filter="cct" value="RGBW"> RGBW</label>
-                    </div>
-                </div>
-
-                <div class="filter-group">
-                    <h4 onclick="toggleFilterGroup(this)">IP</h4>
-                    <div class="filter-group-content">
-                        <label><input type="checkbox" data-filter="ip" value="IP20"> IP20</label>
-                        <label><input type="checkbox" data-filter="ip" value="IP44"> IP44</label>
-                        <label><input type="checkbox" data-filter="ip" value="IP54"> IP54</label>
-                        <label><input type="checkbox" data-filter="ip" value="IP65"> IP65</label>
-                        <label><input type="checkbox" data-filter="ip" value="IP66"> IP66</label>
-                        <label><input type="checkbox" data-filter="ip" value="IP67"> IP67</label>
-                        <label><input type="checkbox" data-filter="ip" value="IP68"> IP68</label>
-                    </div>
+                <!-- 동적 필터 컨테이너 -->
+                <div id="dynamicFilters">
+                    <!-- Firebase에서 카테고리를 동적으로 로드 -->
                 </div>
             </aside>
 
@@ -88,11 +48,21 @@
                 <div class="breadcrumb">Home > 제품</div>
                 <h1 class="page-title">제품</h1>
 
-                <div class="product-grid" id="productGrid">
+                <!-- 대분류 카테고리 (제품 리스트 상단) -->
+                <div id="productTypeFilters" style="display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; flex-wrap: wrap;">
+                    <!-- JavaScript로 동적 생성 -->
+                </div>
+
+                <div class="product-grid" id="productGrid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px;">
                     <!-- 제품들이 JavaScript로 자동 생성됩니다 -->
-                    <div style="text-align: center; padding: 50px; color: #999;">
+                    <div style="text-align: center; padding: 50px; color: #999; grid-column: 1 / -1;">
                         제품 데이터를 로딩 중입니다...
                     </div>
+                </div>
+
+                <!-- 페이징 -->
+                <div id="pagination" style="display: flex; justify-content: center; align-items: center; gap: 10px; margin: 40px 0; flex-wrap: wrap;">
+                    <!-- 페이지 버튼들이 JavaScript로 생성됩니다 -->
                 </div>
             </main>
         </div>
@@ -106,7 +76,6 @@
                     <p>영업2 전화번호 • 031-316-3800</p>
                     <p>A/S 전화번호 • 031-317-0725</p>
                     <p>FAX 전화번호 • 031-317-0726</p>
-                    
                 </div>
 
                 <div class="footer-section">
@@ -139,9 +108,10 @@
             <div class="footer-content">
                 <div class="footer-section">
                     <h3>CONTACT</h3>
-                    <p>TEL • 02-747-3700~1</p>
-                    <p>FAX • 02-747-3702</p>
-                    <p>EMAIL • info@intechlighting.com</p>
+                    <p>영업1 전화번호 • 031-316-7300</p>
+                    <p>영업2 전화번호 • 031-316-3800</p>
+                    <p>A/S 전화번호 • 031-317-0725</p>
+                    <p>FAX 전화번호 • 031-317-0726</p>
                 </div>
 
                 <div class="footer-section">
@@ -149,14 +119,6 @@
                     <p>(주)인테크라이팅</p>
                     <p>경기 시흥시 효현로 (경기 시흥시 대야동)</p>
                     <p>사업자등록번호 799-81-00657</p>
-                </div>
-
-                <div class="footer-section">
-                    <h3>BUSINESS HOURS</h3>
-                    <p>평일 09:00 ~ 18:00</p>
-                    <p>토요일 09:00 ~ 15:00</p>
-                    <p>점심시간 12:00 ~ 13:00</p>
-                    <p>공휴일 휴무</p>
                 </div>
 
                 <div class="copyright">
@@ -172,17 +134,97 @@
     <script src="js/firebase-config.js"></script>
     
     <script>
-    // 전역 products 배열
+    // 전역 변수
     window.products = [];
+    window.categories = {};
 
-    // 연결 상태 확인
     console.log('Firebase 연결 시도 중...');
 
-    // Firebase에서 실시간 제품 데이터 받기
+    // Firebase에서 카테고리 설정 로드
+    database.ref('settings/categories').once('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            window.categories = data;
+            console.log('✅ 카테고리 로드 완료:', categories);
+            
+            // 대분류 버튼 생성
+            if (categories.productType) {
+                renderProductTypeButtons();
+            }
+            
+            // 동적 필터 생성 (script.js의 함수 호출)
+            if (typeof generateDynamicFilters === 'function') {
+                generateDynamicFilters();
+            }
+        }
+    });
+
+    // 대분류 버튼 렌더링
+    function renderProductTypeButtons() {
+        const container = document.getElementById('productTypeFilters');
+        if (!container || !categories.productType) return;
+        
+        container.innerHTML = categories.productType.values.map(type => `
+            <button 
+                class="product-type-btn ${type === 'ALL' ? 'active' : ''}" 
+                data-type="${type}"
+                onclick="selectProductType('${type}')"
+                style="
+                    padding: 12px 30px;
+                    border: 2px solid ${type === 'ALL' ? '#333' : '#ddd'};
+                    background: ${type === 'ALL' ? '#333' : 'white'};
+                    color: ${type === 'ALL' ? 'white' : '#333'};
+                    border-radius: 0;
+                    cursor: pointer;
+                    font-weight: ${type === 'ALL' ? 'bold' : 'normal'};
+                    font-size: 14px;
+                    transition: all 0.3s;
+                "
+            >
+                ${type}
+            </button>
+        `).join('');
+    }
+
+    // 대분류 선택 (수정됨 - 반드시 resetToFirstPage 호출)
+    window.selectProductType = function(type) {
+        console.log('대분류 선택:', type);
+        
+        // 전역 변수에 설정
+        if (typeof selectedFilters !== 'undefined') {
+            selectedFilters.productType = type;
+        } else {
+            window.selectedFilters = { productType: type };
+        }
+        
+        // 버튼 스타일 업데이트
+        document.querySelectorAll('.product-type-btn').forEach(btn => {
+            const isActive = btn.getAttribute('data-type') === type;
+            btn.style.background = isActive ? '#333' : 'white';
+            btn.style.color = isActive ? 'white' : '#333';
+            btn.style.border = isActive ? '2px solid #333' : '2px solid #ddd';
+            btn.style.fontWeight = isActive ? 'bold' : 'normal';
+        });
+        
+        // script.js의 필터 함수 호출 - 반드시 실행되어야 함
+        console.log('resetToFirstPage 호출 시도...');
+        if (typeof resetToFirstPage === 'function') {
+            resetToFirstPage();
+            console.log('✅ resetToFirstPage 호출 완료');
+        } else {
+            console.error('❌ resetToFirstPage 함수를 찾을 수 없습니다!');
+            // 대체 방법으로 직접 createProductCards 호출
+            if (typeof createProductCards === 'function') {
+                createProductCards();
+                console.log('⚠️ createProductCards 직접 호출');
+            }
+        }
+    }
+
+    // Firebase에서 제품 데이터 로드
     database.ref('products').on('value', (snapshot) => {
         const data = snapshot.val();
         if (data) {
-            // Firebase 데이터를 배열로 변환
             window.products = [];
             Object.keys(data).forEach(key => {
                 window.products.push({
@@ -193,129 +235,29 @@
             
             console.log('✅ Firebase 제품 데이터 로드:', products.length, '개');
             
-            // ✅ 1. 먼저 동적 필터 생성 (script.js가 로드된 경우)
-            if (typeof generateDynamicFilters === 'function') {
-                generateDynamicFilters();
-                console.log('✅ 동적 필터 생성 완료');
-            }
-            
-            // ✅ 2. 필터 리스너 설정
-            if (typeof setupDynamicFilterListeners === 'function') {
-                setupDynamicFilterListeners();
-            } else if (typeof setupFilterListeners === 'function') {
-                setupFilterListeners();
-            } else {
-                // 간단한 필터 설정
-                document.querySelectorAll('input[type="checkbox"][data-filter]').forEach(checkbox => {
-                    checkbox.addEventListener('change', applyFilters);
-                });
-            }
-            
-            // ✅ 3. 제품 카드 생성
+            // script.js의 함수들 호출
             if (typeof createProductCards === 'function') {
                 createProductCards();
-            } else {
-                // 폴백: 간단한 제품 표시
-                const grid = document.getElementById('productGrid');
-                if (products.length === 0) {
-                    grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 100px 20px; color: #999;"><h3 style="font-size: 24px; margin-bottom: 15px;">등록된 제품이 없습니다</h3></div>';
-                    return;
-                }
-                
-                grid.innerHTML = products.map((product, index) => `
-                    <div class="product-card" onclick="showDetail(${index})">
-                        <div class="product-image">
-                            <img src="${product.thumbnail}" alt="${product.name}" 
-                                onerror="this.src='img/placeholder.jpg'">
-                        </div>
-                        <div class="product-info">
-                            <div class="product-name">${product.name}</div>
-                            <div class="product-specs">${product.specs ? product.specs.replace(/\n/g, '<br>') : ''}</div>
-                        </div>
-                    </div>
-                `).join('');
             }
-            
-            // ✅ 4. 검색 설정
-            if (typeof setupSearch === 'function') {
-                setupSearch();
+            if (typeof generateDynamicFilters === 'function') {
+                generateDynamicFilters();
             }
             
         } else {
-            // 데이터가 null인 경우 (Firebase에 제품이 없음)
             window.products = [];
-            document.getElementById('productGrid').innerHTML = 
-                '<div style="grid-column: 1 / -1; text-align: center; padding: 100px 20px; color: #999;"><h3 style="font-size: 24px; margin-bottom: 15px;">등록된 제품이 없습니다</h3><p style="font-size: 16px; color: #aaa;">관리자 페이지에서 제품을 추가해주세요</p></div>';
-        }
-    }, (error) => {
-        console.error('Firebase 데이터 로드 실패:', error);
-        document.getElementById('productGrid').innerHTML = 
-            '<div style="grid-column: 1 / -1; text-align: center; padding: 100px 20px; color: #f44336;"><h3 style="font-size: 24px; margin-bottom: 15px;">데이터 로드 실패</h3><p>잠시 후 다시 시도해주세요</p></div>';
-    });
-
-    // 간단한 필터 적용 함수 (script.js가 없을 경우 폴백)
-    function applyFilters() {
-        const activeFilters = {
-            watt: [],
-            cct: [],
-            ip: []
-        };
-        
-        document.querySelectorAll('input[type="checkbox"][data-filter]:checked').forEach(checkbox => {
-            const filterType = checkbox.getAttribute('data-filter');
-            const filterValue = checkbox.value;
-            activeFilters[filterType].push(filterValue);
-        });
-        
-        // 모든 필터가 비어있으면 전체 제품 표시
-        if (activeFilters.watt.length === 0 && activeFilters.cct.length === 0 && activeFilters.ip.length === 0) {
-            if (typeof createProductCards === 'function') {
-                createProductCards();
+            const grid = document.getElementById('productGrid');
+            if (grid) {
+                grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 100px 20px; color: #999;"><h3 style="font-size: 24px; margin-bottom: 15px;">등록된 제품이 없습니다</h3></div>';
             }
-            return;
         }
-        
-        // 필터링된 제품
-        const filtered = products.filter(product => {
-            const categories = product.categories || {};
-            
-            const wattMatch = activeFilters.watt.length === 0 || activeFilters.watt.includes(categories.watt);
-            const cctMatch = activeFilters.cct.length === 0 || activeFilters.cct.includes(categories.cct);
-            const ipMatch = activeFilters.ip.length === 0 || activeFilters.ip.includes(categories.ip);
-            
-            return wattMatch && cctMatch && ipMatch;
-        });
-        
-        // 필터링된 제품 표시
-        const grid = document.getElementById('productGrid');
-        if (filtered.length === 0) {
-            grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 100px 20px; color: #999;"><h3 style="font-size: 24px; margin-bottom: 15px;">해당 조건의 제품이 없습니다</h3><p style="font-size: 16px; color: #aaa;">다른 조건으로 검색해 보세요</p></div>';
-            return;
-        }
-        
-        grid.innerHTML = filtered.map((product) => {
-            const index = products.indexOf(product);
-            return `
-                <div class="product-card" onclick="showDetail(${index})">
-                    <div class="product-image">
-                        <img src="${product.thumbnail}" alt="${product.name}" 
-                            onerror="this.src='img/placeholder.jpg'">
-                    </div>
-                    <div class="product-info">
-                        <div class="product-name">${product.name}</div>
-                        <div class="product-specs">${product.specs ? product.specs.replace(/\n/g, '<br>') : ''}</div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
+    });
 
     // Firebase 연결 상태 모니터링
     database.ref('.info/connected').on('value', function(snapshot) {
         if (snapshot.val() === true) {
             console.log('✅ Firebase 실시간 연결 활성화');
         } else {
-            console.log('⚠️ Firebase 연결 끊김 - 재연결 시도 중...');
+            console.log('⚠️ Firebase 연결 끊김');
         }
     });
     </script>

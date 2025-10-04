@@ -8,11 +8,11 @@
 body {
     font-family: Arial, sans-serif;
     background: linear-gradient(to bottom, #ffffff 0%, #fafafa 100%);
-     -ms-overflow-style: none;
+    -ms-overflow-style: none;
 }
 
 ::-webkit-scrollbar {
-  display: none;
+    display: none;
 }
 
 /* Header wrapper */
@@ -187,10 +187,10 @@ nav a:hover {
     font-weight: bold;
 }
 
-/* Product Grid */
+/* Product Grid - PC 기본 5열 */
 .product-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(5, 1fr);
     gap: 20px;
     padding: 20px 0;
 }
@@ -861,25 +861,39 @@ footer {
    RESPONSIVE DESIGN
    ======================================== */
 
-/* Tablet */
-@media (max-width: 1024px) {
+/* 대형 PC (1400px 이상) - 5열 */
+@media (min-width: 1400px) {
+    .product-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+/* 일반 PC (1025px ~ 1399px) - 4열 */
+@media (min-width: 1025px) and (max-width: 1399px) {
+    .product-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Tablet (769px ~ 1024px) - 3열 */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .product-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+    
+    .product-image {
+        height: 200px;
+    }
+    
     .projects-grid {
         grid-template-columns: repeat(3, 1fr);
         gap: 20px;
         padding: 0 20px;
     }
-
-    .product-grid {
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap: 16px;
-    }
-
-    .product-image {
-        height: 200px;
-    }
 }
 
-/* Mobile */
+/* Mobile (768px 이하) - 2열 */
 @media (max-width: 768px) {
     header {
         display: grid;
@@ -969,6 +983,7 @@ footer {
         margin-bottom: 20px;
     }
 
+    /* 모바일도 2열 유지 */
     .product-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 12px;
@@ -1206,18 +1221,18 @@ footer {
     }
 }
 
-/* Small Mobile */
+/* Small Mobile (480px 이하) - 2열 유지 */
 @media (max-width: 480px) {
-    .projects-grid {
-        grid-template-columns: 1fr;
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
-
-    /* .product-grid {
-        grid-template-columns: 1fr;
-    } */
     
     .product-image {
-        height: 220px;
+        height: 160px;
+    }
+
+    .projects-grid {
+        grid-template-columns: 1fr;
     }
 
     .detail-main-image img {
