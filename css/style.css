@@ -8,6 +8,11 @@
 body {
     font-family: Arial, sans-serif;
     background: linear-gradient(to bottom, #ffffff 0%, #fafafa 100%);
+     -ms-overflow-style: none;
+}
+
+::-webkit-scrollbar {
+  display: none;
 }
 
 /* Header wrapper */
