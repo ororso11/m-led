@@ -1207,9 +1207,9 @@ footer {
         grid-template-columns: 1fr;
     }
 
-    .product-grid {
+    /* .product-grid {
         grid-template-columns: 1fr;
-    }
+    } */
     
     .product-image {
         height: 220px;
