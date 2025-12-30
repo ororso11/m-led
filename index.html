@@ -5,10 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>INTECH LIGHTING - LED 조명 제품</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/specsheet-modal.css">
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <!-- jsPDF + html2canvas for PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
     <!-- 리스트 페이지 -->
@@ -20,7 +25,7 @@
                     <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
                     <div class="logo">INTECH LIGHTING</div>
                     <nav>
-                        <a href="index.html">카탈로그</a>
+                        <!-- <a href="index.html">카탈로그</a> -->
                     </nav>
                     <div class="search-box">
                         <input type="text" id="searchInput" placeholder="search">
@@ -86,7 +91,7 @@
                 </div>
                 <div class="copyright">
                     COPYRIGHT © 2025 INTECH LIGHTING.<br>
-                    ALL RIGHTS RESERVED. - 개발업체 : RECTOPS
+                    ALL RIGHTS RESERVED. - CATALEAF
                 </div>
             </div>
         </footer>
@@ -264,8 +269,10 @@
     
     <!-- 기존 script.js (상세페이지 기능 등) -->
     <script src="js/script.js"></script>
+    <!-- 스펙시트 PDF 생성기 -->
+    <script src="js/specsheet-generator.js"></script>
     <!-- 카카오톡 문의 버튼 -->
-    <a href="http://pf.kakao.com/_your_channel_id" target="_blank" class="kakao-button">
+    <a href="http://pf.kakao.com/@intechlighting/chat" target="_blank" class="kakao-button">
         <img src="https://developers.kakao.com/assets/img/about/logos/kakaolink/kakaolink_btn_medium.png" alt="카카오톡 문의">
     </a>
 </body>
