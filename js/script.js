@@ -252,8 +252,6 @@ function showDetail(index) {
     // 브라우저 히스토리에 상태 추가 (뒤로가기 지원)
     history.pushState({ page: 'detail', productIndex: index }, '', `#product-${index}`);
 
-    console.log('🔍 상세 페이지 제품 데이터:', product);
-    console.log('📦 제품 마크:', product.marks);
 
     // -----------------------------
     // 썸네일 이미지 (메인 + 상세)
@@ -292,10 +290,8 @@ function showDetail(index) {
     // -----------------------------
     let marksHTML = '';
     if (product.marks && Array.isArray(product.marks) && product.marks.length > 0) {
-        console.log('✅ 마크 렌더링 시작:', product.marks.length, '개');
         marksHTML = product.marks.map(mark => {
             if (!mark) return '';
-            console.log('🖼️ 마크:', mark.name, '이미지:', mark.imageUrl);
             return `
                 <div class="icon-wrapper">
                     <div class="icon-box" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px;">
@@ -309,9 +305,33 @@ function showDetail(index) {
             `;
         }).filter(Boolean).join('');
     } else {
-        console.log('⚠️ 마크 없음');
         marksHTML = '';
     }
+
+    // -----------------------------
+    // 도면 이미지 HTML 생성
+    // -----------------------------
+    let drawingImagesContent = '';
+    if (product.drawingImages && product.drawingImages.length > 0) {
+        drawingImagesContent = `
+            <div class="drawing-images-grid" style="display: flex; flex-direction: column; gap: 20px; padding: 20px 0;">
+                ${product.drawingImages.map((img, idx) => `
+                    <div class="drawing-image-item" style="border: 1px solid #ddd; border-radius: 8px; overflow: hidden; background: #fff; width: 100%;">
+                        <img src="${img}" alt="도면 ${idx + 1}" style="width: 100%; height: auto; display: block; cursor: pointer;" onclick="openDrawingModal('${img}')">
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    } else {
+        drawingImagesContent = `<p style="color: #999; padding: 20px 0;">등록된 도면이 없습니다.</p>`;
+    }
+
+    const drawingImagesHTML = `
+        <div class="spec-table-section" style="margin-top: 30px;">
+            <h2 class="spec-title">도면 정보</h2>
+            ${drawingImagesContent}
+        </div>
+    `;
 
     // -----------------------------
     // 전체 HTML 구성
@@ -333,7 +353,7 @@ function showDetail(index) {
         <div class="divider-line"></div>
 
         <div class="detail-main-layout">
-            <!-- 왼쪽: 마크 + 스펙 테이블 -->
+            <!-- 왼쪽: 마크 + 스펙 테이블 + 도면 정보 -->
             <div class="detail-left-section">
                 <div class="icon-grid">
                     ${marksHTML}
@@ -345,6 +365,8 @@ function showDetail(index) {
                         ${tableRowsHTML}
                     </table>
                 </div>
+
+                ${drawingImagesHTML}
             </div>
 
             <!-- 오른쪽: 메인 이미지 + 썸네일 (크기 고정) -->
@@ -356,6 +378,12 @@ function showDetail(index) {
                     ${thumbnailsHTML}
                 </div>
             </div>
+        </div>
+
+        <!-- 도면 이미지 확대 모달 -->
+        <div id="drawingModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center; cursor: pointer;" onclick="closeDrawingModal()">
+            <img id="drawingModalImg" src="" style="max-width: 90%; max-height: 90%; object-fit: contain;">
+            <button style="position: absolute; top: 20px; right: 20px; background: none; border: none; color: white; font-size: 40px; cursor: pointer;">&times;</button>
         </div>
     `;
 
@@ -373,6 +401,25 @@ window.changeMainImage = function (src, event) {
 
     document.querySelectorAll('.thumbnail-item').forEach(item => item.classList.remove('active'));
     if (event?.currentTarget) event.currentTarget.classList.add('active');
+};
+
+// 도면 이미지 확대 모달
+window.openDrawingModal = function(src) {
+    const modal = document.getElementById('drawingModal');
+    const img = document.getElementById('drawingModalImg');
+    if (modal && img) {
+        img.src = src;
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+};
+
+window.closeDrawingModal = function() {
+    const modal = document.getElementById('drawingModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
 };
 
 function goBack() {
@@ -456,6 +503,29 @@ function showDetailWithoutHistory(index) {
         }).filter(Boolean).join('');
     }
 
+    // 도면 이미지 HTML 생성
+    let drawingImagesContent2 = '';
+    if (product.drawingImages && product.drawingImages.length > 0) {
+        drawingImagesContent2 = `
+            <div class="drawing-images-grid" style="display: flex; flex-direction: column; gap: 20px; padding: 20px 0;">
+                ${product.drawingImages.map((img, idx) => `
+                    <div class="drawing-image-item" style="border: 1px solid #ddd; border-radius: 8px; overflow: hidden; background: #fff; width: 100%;">
+                        <img src="${img}" alt="도면 ${idx + 1}" style="width: 100%; height: auto; display: block; cursor: pointer;" onclick="openDrawingModal('${img}')">
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    } else {
+        drawingImagesContent2 = `<p style="color: #999; padding: 20px 0;">등록된 도면이 없습니다.</p>`;
+    }
+
+    const drawingImagesHTML = `
+        <div class="spec-table-section" style="margin-top: 30px;">
+            <h2 class="spec-title">도면 정보</h2>
+            ${drawingImagesContent2}
+        </div>
+    `;
+
     detailContent.innerHTML = `
         <div class="detail-header-bar">
             <h1 class="detail-title-text">${product.name}</h1>
@@ -484,6 +554,8 @@ function showDetailWithoutHistory(index) {
                         ${tableRowsHTML}
                     </table>
                 </div>
+
+                ${drawingImagesHTML}
             </div>
 
             <div class="detail-right-section" style="flex-shrink: 0; width: 600px;">
@@ -494,6 +566,12 @@ function showDetailWithoutHistory(index) {
                     ${thumbnailsHTML}
                 </div>
             </div>
+        </div>
+
+        <!-- 도면 이미지 확대 모달 -->
+        <div id="drawingModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center; cursor: pointer;" onclick="closeDrawingModal()">
+            <img id="drawingModalImg" src="" style="max-width: 90%; max-height: 90%; object-fit: contain;">
+            <button style="position: absolute; top: 20px; right: 20px; background: none; border: none; color: white; font-size: 40px; cursor: pointer;">&times;</button>
         </div>
     `;
 
@@ -676,22 +754,17 @@ function refreshFilters() {
 // 이미지 확대 기능 (전자상거래 스타일)
 // ========================================
 function initImageZoom() {
-    console.log('🔍 initImageZoom 호출됨');
     
     // 모바일/태블릿에서는 확대 기능 비활성화
     if (window.innerWidth <= 1024) {
-        console.log('📱 모바일/태블릿 화면 - 확대 기능 비활성화');
         return;
     }
     
     const mainImage = document.querySelector('.main-product-image img');
     const imageContainer = document.querySelector('.main-product-image');
     
-    console.log('🖼️ 이미지 컨테이너:', imageContainer);
-    console.log('🖼️ 메인 이미지:', mainImage);
     
     if (!mainImage || !imageContainer) {
-        console.log('❌ 이미지 요소를 찾을 수 없음');
         return;
     }
     
@@ -699,11 +772,9 @@ function initImageZoom() {
     const oldLens = document.querySelector('.zoom-lens');
     const oldResult = document.querySelector('.zoom-result');
     if (oldLens) {
-        console.log('🗑️ 기존 렌즈 제거');
         oldLens.remove();
     }
     if (oldResult) {
-        console.log('🗑️ 기존 결과창 제거');
         oldResult.remove();
     }
     
@@ -711,13 +782,11 @@ function initImageZoom() {
     const zoomLens = document.createElement('div');
     zoomLens.className = 'zoom-lens';
     imageContainer.appendChild(zoomLens);
-    console.log('✅ 확대 렌즈 생성됨');
     
     // 확대 결과 영역 생성
     const zoomResult = document.createElement('div');
     zoomResult.className = 'zoom-result';
     imageContainer.parentElement.appendChild(zoomResult);
-    console.log('✅ 확대 결과 영역 생성됨');
     
     function setupZoom() {
         const cx = zoomResult.offsetWidth / zoomLens.offsetWidth;
@@ -725,35 +794,23 @@ function initImageZoom() {
         
         zoomResult.style.backgroundImage = `url('${mainImage.src}')`;
         zoomResult.style.backgroundSize = `${mainImage.width * cx}px ${mainImage.height * cy}px`;
-        
-        console.log('🔧 줌 설정 완료:', {
-            cx: cx,
-            cy: cy,
-            imageWidth: mainImage.width,
-            imageHeight: mainImage.height,
-            backgroundSize: zoomResult.style.backgroundSize
-        });
     }
     
     // 이미지 로드 완료 후 설정
     if (mainImage.complete) {
-        console.log('✅ 이미지 이미 로드됨');
         setupZoom();
     } else {
-        console.log('⏳ 이미지 로딩 대기 중...');
         mainImage.addEventListener('load', setupZoom);
     }
     
     // 마우스 이벤트
     imageContainer.addEventListener('mouseenter', function() {
-        console.log('🖱️ 마우스 진입');
         zoomLens.style.display = 'block';
         zoomResult.style.display = 'block';
         setupZoom();
     });
     
     imageContainer.addEventListener('mouseleave', function() {
-        console.log('🖱️ 마우스 나감');
         zoomLens.style.display = 'none';
         zoomResult.style.display = 'none';
     });
@@ -790,7 +847,6 @@ function initImageZoom() {
         zoomResult.style.backgroundPosition = `-${x * cx}px -${y * cy}px`;
     });
     
-    console.log('✅ 이미지 확대 기능 초기화 완료');
 }
 
 // ========================================
@@ -815,7 +871,6 @@ async function downloadPDF(index) {
         return;
     }
 
-    console.log('📄 PDF 생성 시작...');
 
     // 로딩 오버레이 표시
     const loadingOverlay = document.createElement('div');
@@ -858,7 +913,6 @@ async function downloadPDF(index) {
                 // 프록시 서버를 통해 CORS 우회
                 const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
 
-                console.log('📷 이미지 fetch 시도:', url.substring(0, 50));
 
                 // 타임아웃 적용
                 const controller = new AbortController();
@@ -872,7 +926,6 @@ async function downloadPDF(index) {
                     return new Promise((resolve) => {
                         const reader = new FileReader();
                         reader.onloadend = () => {
-                            console.log('✅ 이미지 Base64 변환 성공!');
                             resolve(reader.result);
                         };
                         reader.onerror = () => resolve(null);
@@ -881,9 +934,7 @@ async function downloadPDF(index) {
                 }
             } catch (e) {
                 if (e.name === 'AbortError') {
-                    console.log('⚠️ 이미지 로딩 타임아웃:', url.substring(0, 50));
                 } else {
-                    console.log('⚠️ 프록시 fetch 실패:', e.message);
                 }
             }
             return null;
@@ -909,11 +960,6 @@ async function downloadPDF(index) {
             }
         }
 
-        console.log('📄 이미지 변환 결과:', {
-            mainImage: capturedImageBase64 ? '성공' : '실패',
-            thumbnails: capturedThumbnails.length + '개'
-        });
-
         // 마크 이미지들도 Base64로 변환
         updateLoadingStatus('마크 이미지 처리 중...');
         const marksWithBase64 = [];
@@ -931,14 +977,10 @@ async function downloadPDF(index) {
                 }
             }
         }
-        console.log('📄 마크 이미지 변환:', marksWithBase64.length + '개');
 
         updateLoadingStatus('PDF 생성 준비 중...');
 
         // 디버깅: tableData 전체 출력
-        console.log('📄 tableData 키 목록:', product.tableData ? Object.keys(product.tableData) : 'null');
-        console.log('📄 tableData 전체:', product.tableData);
-        console.log('📄 loadedTableColumns:', loadedTableColumns);
 
         // tableData에서 값 찾는 헬퍼 함수 (loadedTableColumns 활용)
         const getTableValue = (...targetLabels) => {
@@ -955,7 +997,6 @@ async function downloadPDF(index) {
                             // 정확히 일치하거나 포함되는 경우
                             if (upperLabel === upperTarget || upperLabel.includes(upperTarget) || upperTarget.includes(upperLabel)) {
                                 if (product.tableData[col.id]) {
-                                    console.log(`📄 매칭: "${targetLabel}" → col.id="${col.id}" → "${product.tableData[col.id]}"`);
                                     return product.tableData[col.id];
                                 }
                             }
@@ -969,7 +1010,6 @@ async function downloadPDF(index) {
                     for (const key of keys) {
                         const upperKey = key.toUpperCase();
                         if (upperKey === upperTarget || upperKey.includes(upperTarget) || upperTarget.includes(upperKey)) {
-                            console.log(`📄 직접 매칭: "${targetLabel}" → key="${key}" → "${product.tableData[key]}"`);
                             return product.tableData[key];
                         }
                     }
@@ -1017,18 +1057,6 @@ async function downloadPDF(index) {
             specs: product.specs || '',
             companyInfo: 'INTECH LIGHTING Co.,Ltd.'
         };
-
-        // 디버깅: 변환된 데이터 출력
-        console.log('📄 PDF용 변환 결과:', {
-            size: productForPDF.size,
-            color: productForPDF.color,
-            finish: productForPDF.finish,
-            lamp: productForPDF.lamp,
-            beamAngle: productForPDF.beamAngle,
-            cri: productForPDF.cri,
-            marks: productForPDF.marks?.length || 0,
-            images: productForPDF.images?.length || 0
-        });
 
         // 로딩 제거
         removeLoading();
@@ -1091,8 +1119,6 @@ window.addEventListener('DOMContentLoaded', function() {
                 loadedCategories = settings.categories || {};
                 loadedTableColumns = settings.tableColumns || [];
                 
-                console.log('✅ 카테고리 로드:', Object.keys(loadedCategories).length, '개');
-                console.log('✅ 테이블 컬럼 로드:', loadedTableColumns.length, '개');
                 
                 Object.keys(loadedCategories).forEach(key => {
                     if (key !== 'productType') selectedFilters[key] = [];
@@ -1104,7 +1130,6 @@ window.addEventListener('DOMContentLoaded', function() {
     const checkDataInterval = setInterval(() => {
         if (typeof products !== 'undefined' && products.length > 0 && Object.keys(loadedCategories).length > 0) {
             clearInterval(checkDataInterval);
-            console.log('✅ 데이터 준비 완료');
             generateDynamicFilters();
             createProductCards();
         }

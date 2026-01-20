@@ -143,20 +143,17 @@
     window.products = [];
     window.categories = {};
 
-    console.log('Firebase 연결 시도 중...');
-
     // Firebase에서 카테고리 설정 로드
     database.ref('settings/categories').once('value', (snapshot) => {
         const data = snapshot.val();
         if (data) {
             window.categories = data;
-            console.log('✅ 카테고리 로드 완료:', categories);
-            
+
             // 대분류 버튼 생성
             if (categories.productType) {
                 renderProductTypeButtons();
             }
-            
+
             // 동적 필터 생성 (script.js의 함수 호출)
             if (typeof generateDynamicFilters === 'function') {
                 generateDynamicFilters();
@@ -191,17 +188,15 @@
         `).join('');
     }
 
-    // 대분류 선택 (수정됨 - 반드시 resetToFirstPage 호출)
+    // 대분류 선택
     window.selectProductType = function(type) {
-        console.log('대분류 선택:', type);
-        
         // 전역 변수에 설정
         if (typeof selectedFilters !== 'undefined') {
             selectedFilters.productType = type;
         } else {
             window.selectedFilters = { productType: type };
         }
-        
+
         // 버튼 스타일 업데이트
         document.querySelectorAll('.product-type-btn').forEach(btn => {
             const isActive = btn.getAttribute('data-type') === type;
@@ -210,19 +205,12 @@
             btn.style.border = isActive ? '2px solid #333' : '2px solid #ddd';
             btn.style.fontWeight = isActive ? 'bold' : 'normal';
         });
-        
-        // script.js의 필터 함수 호출 - 반드시 실행되어야 함
-        console.log('resetToFirstPage 호출 시도...');
+
+        // script.js의 필터 함수 호출
         if (typeof resetToFirstPage === 'function') {
             resetToFirstPage();
-            console.log('✅ resetToFirstPage 호출 완료');
-        } else {
-            console.error('❌ resetToFirstPage 함수를 찾을 수 없습니다!');
-            // 대체 방법으로 직접 createProductCards 호출
-            if (typeof createProductCards === 'function') {
-                createProductCards();
-                console.log('⚠️ createProductCards 직접 호출');
-            }
+        } else if (typeof createProductCards === 'function') {
+            createProductCards();
         }
     }
 
@@ -237,9 +225,7 @@
                     _key: key
                 });
             });
-            
-            console.log('✅ Firebase 제품 데이터 로드:', products.length, '개');
-            
+
             // script.js의 함수들 호출
             if (typeof createProductCards === 'function') {
                 createProductCards();
@@ -247,7 +233,7 @@
             if (typeof generateDynamicFilters === 'function') {
                 generateDynamicFilters();
             }
-            
+
         } else {
             window.products = [];
             const grid = document.getElementById('productGrid');
@@ -259,11 +245,7 @@
 
     // Firebase 연결 상태 모니터링
     database.ref('.info/connected').on('value', function(snapshot) {
-        if (snapshot.val() === true) {
-            console.log('✅ Firebase 실시간 연결 활성화');
-        } else {
-            console.log('⚠️ Firebase 연결 끊김');
-        }
+        // 연결 상태 변경 시 처리
     });
     </script>
     

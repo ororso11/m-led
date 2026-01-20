@@ -13,13 +13,11 @@ const firebaseConfig = {
 try {
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
-        console.log('✅ Firebase 초기화 성공');
     } else {
         firebase.app();
-        console.log('✅ Firebase 이미 초기화됨');
     }
 } catch (error) {
-    console.error('❌ Firebase 초기화 실패:', error);
+    // Firebase 초기화 실패
 }
 
 // Firebase 서비스 인스턴스
@@ -30,29 +28,22 @@ let storage = null;
 try {
     if (firebase.storage) {
         storage = firebase.storage();
-        console.log('✅ Firebase Storage 초기화 성공');
-    } else {
-        console.error('❌ Firebase Storage SDK가 로드되지 않았습니다');
     }
 } catch (error) {
-    console.error('❌ Firebase Storage 초기화 실패:', error);
+    // Storage 초기화 실패
 }
 
 // 연결 상태 모니터링
 database.ref('.info/connected').on('value', (snapshot) => {
-    if (snapshot.val() === true) {
-        console.log('✅ Firebase Realtime Database 연결됨');
-    } else {
-        console.log('⚠️ Firebase 연결 끊김');
+    // 연결 상태 변경 시 처리
+});
+
+// Auth 초기화
+let auth = null;
+try {
+    if (firebase.auth) {
+        auth = firebase.auth();
     }
-});
-
-// 디버그 정보
-console.log('Firebase Config:', {
-    projectId: firebaseConfig.projectId,
-    storageBucket: firebaseConfig.storageBucket,
-    databaseURL: firebaseConfig.databaseURL
-});
-
-// 기존 코드 아래에 추가
-const auth = firebase.auth();
+} catch (error) {
+    // Auth 초기화 실패
+}

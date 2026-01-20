@@ -9,6 +9,7 @@ let specsList = [];
 let editingIndex = null;
 let editingKey = null;
 let productMarks = [];
+let existingDrawingImages = []; // 기존 도면 이미지 관리용
 
 // 기본 카테고리 및 테이블 컬럼 설정
 let categories = {
@@ -82,7 +83,6 @@ async function loadSettings() {
                 }
 
                 if (needsMigration) {
-                    console.log('카테고리 데이터 마이그레이션 중...');
                     await saveSettings();
                 }
             }
@@ -124,7 +124,6 @@ async function saveSettings() {
             tableColumns,
             updatedAt: firebase.database.ServerValue.TIMESTAMP
         });
-        console.log('✅ 설정 저장 완료');
     } catch (error) {
         console.error('설정 저장 실패:', error);
     }
@@ -137,7 +136,6 @@ function renderProductMarks() {
     const container = document.getElementById('productMarksContainer');
     if (!container) return;
 
-    console.log('📦 렌더링할 마크:', productMarks.length, '개');
 
     if (!productMarks || productMarks.length === 0) {
         container.innerHTML = '<div style="grid-column: 1 / -1; text-align:center; padding:40px 20px; color:#999; font-size:14px;">등록된 마크가 없습니다.<br>"+ 새 마크 추가" 버튼을 클릭하세요.</div>';
@@ -215,14 +213,12 @@ async function uploadImageToFirebase(file, folder) {
         const filename = `${timestamp}_${safeName}`;
         const storageRef = firebase.storage().ref(`${folder}/${filename}`);
 
-        console.log('업로드 시작:', folder, filename);
 
         const uploadTask = storageRef.put(file);
         await uploadTask;
 
         const downloadURL = await storageRef.getDownloadURL();
 
-        console.log('업로드 완료:', downloadURL);
         return downloadURL;
     } catch (error) {
         console.error('업로드 실패:', error);
@@ -260,8 +256,6 @@ window.addMark = async function() {
         };
 
         productMarks.push(newMark);
-        console.log('✅ 마크 추가됨:', newMark);
-        console.log('📦 현재 productMarks 배열:', productMarks);
         
         renderProductMarks();
         closeAddMarkModal();
@@ -284,8 +278,6 @@ window.deleteMark = function(index) {
     // 배열에서 삭제
     productMarks.splice(index, 1);
     
-    console.log('🗑️ 마크 삭제 후 배열:', productMarks);
-    console.log('📦 남은 마크 개수:', productMarks.length);
     
     // 화면 업데이트
     renderProductMarks();
@@ -525,7 +517,6 @@ window.deleteTableColumn = async function(id) {
 // 페이지 초기화
 // ========================================
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Admin panel initializing...');
 
     const loadingMessage = document.getElementById('loadingMessage');
     if (loadingMessage) loadingMessage.style.display = 'none';
@@ -569,7 +560,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     products.push(product);
                 });
 
-                console.log('Firebase 데이터 로드:', products.length, '개 제품');
 
                 const activeTab = document.querySelector('.tab.active');
                 if (activeTab) {
@@ -579,7 +569,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             } else {
                 products = [];
-                console.log('제품 데이터 없음');
                 const activeTab = document.querySelector('.tab.active');
                 if (activeTab) {
                     const tabName = activeTab.getAttribute('data-tab');
@@ -666,6 +655,10 @@ window.editProduct = function(index) {
     }
     productMarks = Array.isArray(marks) ? [...marks] : [];
     renderProductMarks();
+
+    // 기존 도면 이미지 로드
+    existingDrawingImages = Array.isArray(product.drawingImages) ? [...product.drawingImages] : [];
+    renderExistingDrawingImages();
 
     const thumbInput = document.getElementById('thumbnailInput');
     const detailInput = document.getElementById('detailImagesInput');
@@ -765,6 +758,56 @@ window.handleDetailImagesUpload = function(event) {
     });
 }
 
+window.handleDrawingImagesUpload = function(event) {
+    const files = Array.from(event.target.files || []);
+    const previewContainer = document.getElementById('drawingImagesPreview');
+    if (!previewContainer) return;
+    previewContainer.innerHTML = '';
+    files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewContainer.innerHTML += `<img src="${e.target.result}" style="max-width:150px;max-height:150px;margin:5px;border-radius:5px;border:2px solid #2196F3;">`;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+// ========================================
+// 기존 도면 이미지 관리
+// ========================================
+function renderExistingDrawingImages() {
+    const container = document.getElementById('existingDrawingImagesContainer');
+    if (!container) return;
+
+    if (!existingDrawingImages || existingDrawingImages.length === 0) {
+        container.innerHTML = '<p style="color: #999; font-size: 13px;">등록된 도면이 없습니다.</p>';
+        return;
+    }
+
+    container.innerHTML = existingDrawingImages.map((imgUrl, index) => `
+        <div style="position: relative; display: inline-block; margin: 5px;">
+            <img src="${imgUrl}" style="max-width:150px; max-height:150px; border-radius:5px; border:2px solid #2196F3;">
+            <button type="button" onclick="deleteExistingDrawingImage(${index})"
+                    style="position: absolute; top: -8px; right: -8px; width: 24px; height: 24px;
+                           background: #f44336; color: white; border: none; border-radius: 50%;
+                           cursor: pointer; font-size: 14px; font-weight: bold; line-height: 1;">
+                ×
+            </button>
+        </div>
+    `).join('');
+}
+
+window.deleteExistingDrawingImage = function(index) {
+    if (!existingDrawingImages || index < 0 || index >= existingDrawingImages.length) return;
+
+    if (!confirm('이 도면을 삭제하시겠습니까?')) return;
+
+    existingDrawingImages.splice(index, 1);
+    renderExistingDrawingImages();
+
+    alert('도면이 삭제되었습니다.\n\n⚠️ "제품 수정 완료" 버튼을 눌러야 최종 저장됩니다.');
+}
+
 // ========================================
 // specs 리스트 관리
 // ========================================
@@ -835,14 +878,12 @@ function validateProductForm() {
 async function handleSubmit(e) {
     e.preventDefault();
     
-    console.log('🚀 폼 제출 시작');
-    console.log('📦 현재 productMarks:', productMarks);
-    console.log('📦 productMarks 길이:', productMarks.length);
 
     if (!validateProductForm()) return;
 
     const thumbnailInput = document.getElementById('thumbnailInput');
     const detailImagesInput = document.getElementById('detailImagesInput');
+    const drawingImagesInput = document.getElementById('drawingImagesInput');
     const form = document.getElementById('productForm');
     const loading = document.getElementById('loadingMessage');
     if (loading) loading.style.display = 'block';
@@ -851,29 +892,52 @@ async function handleSubmit(e) {
         // 이미지 업로드
         let thumbnailPath = '';
         let detailPaths = [];
+        let drawingPaths = [];
 
         if (editingIndex !== null && products[editingIndex]) {
             // ========== 수정 모드 ==========
             const currentProduct = products[editingIndex];
 
+            // 모든 이미지 병렬 업로드
+            const uploadPromises = [];
+
             // 썸네일
             if (thumbnailInput?.files?.length) {
-                thumbnailPath = await uploadImageToFirebase(thumbnailInput.files[0], 'thumbnails');
+                uploadPromises.push(
+                    uploadImageToFirebase(thumbnailInput.files[0], 'thumbnails')
+                        .then(path => { thumbnailPath = path; })
+                );
             } else {
                 thumbnailPath = currentProduct.thumbnail || '';
             }
 
             // 상세이미지
             if (detailImagesInput?.files?.length) {
-                for (const file of detailImagesInput.files) {
-                    const path = await uploadImageToFirebase(file, 'details');
-                    detailPaths.push(path);
-                }
+                const detailPromises = Array.from(detailImagesInput.files).map(file =>
+                    uploadImageToFirebase(file, 'details')
+                );
+                uploadPromises.push(
+                    Promise.all(detailPromises).then(paths => { detailPaths = paths; })
+                );
             } else {
                 detailPaths = Array.isArray(currentProduct.detailImages)
                     ? [...currentProduct.detailImages]
                     : [];
             }
+
+            // 도면이미지 - 기존 유지(삭제 반영) + 새 파일 추가
+            drawingPaths = [...existingDrawingImages];
+            if (drawingImagesInput?.files?.length) {
+                const drawingPromises = Array.from(drawingImagesInput.files).map(file =>
+                    uploadImageToFirebase(file, 'drawings')
+                );
+                uploadPromises.push(
+                    Promise.all(drawingPromises).then(paths => { drawingPaths = drawingPaths.concat(paths); })
+                );
+            }
+
+            // 모든 업로드 완료 대기
+            await Promise.all(uploadPromises);
 
             // 🔹 기존 tableData 복사 후 업데이트 (기존 필드 보존)
             const tableData = currentProduct.tableData ? {...currentProduct.tableData} : {};
@@ -903,6 +967,7 @@ async function handleSubmit(e) {
                 productNumber: document.getElementById('productNumber').value || '',
                 thumbnail: thumbnailPath,
                 detailImages: detailPaths,
+                drawingImages: drawingPaths,
                 specs: document.getElementById('productSpecs').value || '',
                 specsList: Array.isArray(specsList) ? specsList : [],
                 categories: productCategories,
@@ -914,9 +979,6 @@ async function handleSubmit(e) {
             // 🔥 _key 필드는 Firebase에 저장하지 않음
             delete updatedProduct._key;
 
-            console.log('🔄 업데이트할 데이터:', updatedProduct);
-            console.log('📦 저장될 marks:', updatedProduct.marks);
-            console.log('📦 marks 배열 길이:', updatedProduct.marks.length);
 
             // Firebase 업데이트
             await database.ref(`products/${editingKey}`).set(updatedProduct);
@@ -925,15 +987,33 @@ async function handleSubmit(e) {
 
         } else {
             // ========== 추가 모드 ==========
+            const uploadPromises = [];
+
             if (thumbnailInput?.files?.length) {
-                thumbnailPath = await uploadImageToFirebase(thumbnailInput.files[0], 'thumbnails');
+                uploadPromises.push(
+                    uploadImageToFirebase(thumbnailInput.files[0], 'thumbnails')
+                        .then(path => { thumbnailPath = path; })
+                );
             }
             if (detailImagesInput?.files?.length) {
-                for (const file of detailImagesInput.files) {
-                    const path = await uploadImageToFirebase(file, 'details');
-                    detailPaths.push(path);
-                }
+                const detailPromises = Array.from(detailImagesInput.files).map(file =>
+                    uploadImageToFirebase(file, 'details')
+                );
+                uploadPromises.push(
+                    Promise.all(detailPromises).then(paths => { detailPaths = paths; })
+                );
             }
+            if (drawingImagesInput?.files?.length) {
+                const drawingPromises = Array.from(drawingImagesInput.files).map(file =>
+                    uploadImageToFirebase(file, 'drawings')
+                );
+                uploadPromises.push(
+                    Promise.all(drawingPromises).then(paths => { drawingPaths = paths; })
+                );
+            }
+
+            // 모든 업로드 완료 대기
+            await Promise.all(uploadPromises);
 
             // 🔹 tableData 객체 생성
             const tableData = {};
@@ -959,6 +1039,7 @@ async function handleSubmit(e) {
                 productNumber: document.getElementById('productNumber').value || '',
                 thumbnail: thumbnailPath,
                 detailImages: detailPaths,
+                drawingImages: drawingPaths,
                 specs: document.getElementById('productSpecs').value || '',
                 specsList: Array.isArray(specsList) ? specsList : [],
                 categories: productCategories,
@@ -967,7 +1048,6 @@ async function handleSubmit(e) {
                 createdAt: firebase.database.ServerValue.TIMESTAMP
             };
 
-            console.log('➕ 추가할 데이터:', productData);
 
             await database.ref('products').push(productData);
             alert('제품이 추가되었습니다!');
@@ -977,10 +1057,13 @@ async function handleSubmit(e) {
         if (form) form.reset();
         document.getElementById('thumbnailPreview').innerHTML = '';
         document.getElementById('detailImagesPreview').innerHTML = '';
+        document.getElementById('drawingImagesPreview').innerHTML = '';
         specsList = [];
         updateSpecsList();
         productMarks = [];
         renderProductMarks();
+        existingDrawingImages = [];
+        renderExistingDrawingImages();
 
         const successMessage = document.getElementById('successMessage');
         if (successMessage) {

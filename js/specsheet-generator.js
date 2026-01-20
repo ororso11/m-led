@@ -20,7 +20,6 @@ async function convertImageToBase64(url) {
         return url;
     }
 
-    console.log('🖼️ 이미지 변환 시작:', url.substring(0, 60) + '...');
 
     // 방법 0: 페이지에 이미 로드된 이미지 찾기 (CORS 우회)
     const existingImg = document.querySelector(`img[src="${url}"]`);
@@ -32,10 +31,8 @@ async function convertImageToBase64(url) {
             const ctx = canvas.getContext('2d');
             ctx.drawImage(existingImg, 0, 0);
             const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-            console.log('✅ 기존 로드된 이미지 사용 성공');
             return dataUrl;
         } catch (e) {
-            console.log('⚠️ 기존 이미지 canvas 변환 실패 (tainted)');
         }
     }
 
@@ -54,12 +51,10 @@ async function convertImageToBase64(url) {
                 reader.readAsDataURL(blob);
             });
             if (result) {
-                console.log('✅ fetch 방식 성공');
                 return result;
             }
         }
     } catch (e) {
-        console.log('⚠️ fetch 방식 실패:', e.message);
     }
 
     // 방법 2: Image 객체 + crossOrigin anonymous
@@ -81,7 +76,6 @@ async function convertImageToBase64(url) {
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0);
                     const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-                    console.log('✅ Image+Canvas 방식 성공');
                     resolve(dataUrl);
                 } catch (e) {
                     resolve(null);
@@ -98,10 +92,8 @@ async function convertImageToBase64(url) {
         });
         if (result) return result;
     } catch (e) {
-        console.log('⚠️ Image 방식 실패');
     }
 
-    console.log('❌ 이미지 변환 실패 - null 반환');
     return null;
 }
 
@@ -306,9 +298,6 @@ function downloadSpecSheetPDF(product) {
     }
 
     // 디버깅: 받은 데이터 전체 출력
-    console.log('='.repeat(50));
-    console.log('📄 PDF 생성 - 전체 데이터:', JSON.stringify(product, null, 2));
-    console.log('='.repeat(50));
 
     openSpecSheetModal(product);
 }
@@ -323,7 +312,6 @@ function createSpecSheetHTML(product) {
     // CODE 값
     const codeValue = product.code || product.productCode || product.productNumber || '-';
 
-    console.log('📄 createSpecSheetHTML - product:', product);
 
     // ========================================
     // 이미지 섹션 - 캡처된 Base64 이미지 사용
@@ -331,8 +319,6 @@ function createSpecSheetHTML(product) {
     const mainImageBase64 = product.mainImageBase64;
     const subImagesBase64 = product.subImagesBase64 || [];
 
-    console.log('📄 메인 이미지 Base64:', mainImageBase64 ? '있음' : '없음');
-    console.log('📄 서브 이미지:', subImagesBase64.length + '개');
 
     // 이미지 크기 통일 (60mm x 60mm)
     const imgSize = '60mm';
@@ -361,7 +347,6 @@ function createSpecSheetHTML(product) {
     const rawMarks = product.marks || [];
     let marksHTML = '';
 
-    console.log('📄 마크 데이터 (raw):', rawMarks);
 
     // 유효한 마크만 필터링 (이미지가 있거나, 유효한 이름이 있는 경우)
     const validMarks = rawMarks.filter(mark => {
@@ -383,7 +368,6 @@ function createSpecSheetHTML(product) {
         return false;
     });
 
-    console.log('📄 유효한 마크:', validMarks);
 
     // 유효한 마크 이름인지 확인 (숫자만 있거나 1글자면 무효)
     const isValidMarkName = (name) => {
@@ -556,7 +540,6 @@ async function createSpecSheetPDF(product) {
         throw new Error('PDF 생성에 필요한 라이브러리를 불러오지 못했습니다.\n페이지를 새로고침 후 다시 시도해주세요.');
     }
 
-    console.log('📄 PDF 생성 시작...');
 
     // 컨테이너 생성 (화면 밖에 숨김)
     let container = null;
@@ -581,7 +564,6 @@ async function createSpecSheetPDF(product) {
     await new Promise(r => setTimeout(r, 300));
 
     try {
-        console.log('📷 캡처 중...');
 
         // 타임아웃 설정 (30초)
         const capturePromise = html2canvas(specElement, {
@@ -602,7 +584,6 @@ async function createSpecSheetPDF(product) {
             throw new Error('PDF 캡처에 실패했습니다.\n다시 시도해주세요.');
         }
 
-        console.log('📝 PDF 변환 중... (캔버스 크기:', canvas.width, 'x', canvas.height, ')');
 
         // 메모리 체크 (대략적)
         const estimatedMemory = canvas.width * canvas.height * 4; // RGBA
@@ -639,7 +620,6 @@ async function createSpecSheetPDF(product) {
 
         try {
             doc.save(fileName);
-            console.log('✅ PDF 저장:', fileName);
             // 완료 토스트 메시지
             showToast(`${fileName} 다운로드 완료!`);
         } catch (e) {

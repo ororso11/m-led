@@ -240,7 +240,6 @@
             // EmailJS로 전송
             emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', formData)
                 .then(function(response) {
-                    console.log('SUCCESS!', response.status, response.text);
                     
                     // 성공 메시지 표시
                     successMessage.style.display = 'block';
@@ -264,7 +263,6 @@
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                     
                 }, function(error) {
-                    console.log('FAILED...', error);
                     
                     // 에러 메시지 표시
                     errorMessage.style.display = 'block';
