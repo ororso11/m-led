@@ -661,6 +661,10 @@ function extractUniqueCategories() {
                 if (!isNaN(bNum)) return 1;
                 return a.localeCompare(b);
             } else {
+                // 숫자가 포함된 값은 숫자 크기순으로 정렬 (타공 치수 등)
+                const aNum = parseFloat(a.replace(/[^0-9.]/g, ''));
+                const bNum = parseFloat(b.replace(/[^0-9.]/g, ''));
+                if (!isNaN(aNum) && !isNaN(bNum) && aNum !== bNum) return aNum - bNum;
                 return a.localeCompare(b);
             }
         });
